@@ -12,6 +12,8 @@ defineProps({
   <section v-for="item in data" :key="item.id">
     <el-sub-menu v-if="item.children && item.children.filter(t => !t.IsButton && !t.IsHide).length > 0" :index="item.id">
       <template #title>
+        <i v-if="item.children && item.children.length > 0 && item.iconCls && !item.IsButton" class="fa"
+          :class="item.iconCls"></i>
         <span>{{ item.name }}</span>
       </template>
       <!-- 多级路由菜单 -->

@@ -211,12 +211,12 @@ const inputDemoAccount = (name, pass) => {
       </el-form-item>
       <el-form-item style="width: 100%">
         <el-button style="width: 100%">Mock登录 </el-button>
-        <el-row>
+        <!-- <el-row>
           <el-col>token: {{ userStore.token }}</el-col>
           <el-col>name: {{ userStore.name }}</el-col>
           <el-col>pass: {{ userStore.pass }}</el-col>
           <el-col>isRemember: {{ userStore.isRemember }}</el-col>
-        </el-row>
+        </el-row> -->
       </el-form-item>
     </el-form>
   </div>

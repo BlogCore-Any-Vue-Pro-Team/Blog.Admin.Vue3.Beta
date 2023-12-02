@@ -99,7 +99,18 @@ const handleCommand = async (key) => {
     </el-container>
   </el-container>
 </template>
-
+<style>
+.fa {
+    vertical-align: baseline;
+    margin-right: 10px;
+}
+.el-menu--collapse i{
+  font-size: 20px !important;
+}
+.el-menu--collapse span,.el-menu--collapse .el-sub-menu__icon-arrow{
+  display: none !important;
+}
+</style>
 <style lang="scss" scoped>
 .layout-container {
   height: 100vh;
@@ -108,8 +119,8 @@ const handleCommand = async (key) => {
     background-color: #2f3e52;
 
     &__logo {
-      height: 120px;
-      background: url('@/assets/img/default.png') no-repeat center / 120px auto;
+      height: 70px;
+      background: url('@/assets/img/default2.png') no-repeat center / 120px auto;
     }
 
     .el-menu {
