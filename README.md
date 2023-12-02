@@ -3,6 +3,8 @@ This is a Vue3 project + elementPlus Integration solution testing.
 
 项目运行
 
+nodejs建议版本>= 16
+
 安装pnpm
 npm install -g pnpm
 
