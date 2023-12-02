@@ -1,4 +1,4 @@
-# Blog.Admin.Vue3.Bata
+# Blog.Admin.Vue3.Beta
 This is a Vue3 project + elementPlus Integration solution testing.
 
 项目运行
