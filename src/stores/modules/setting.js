@@ -8,7 +8,7 @@ export const useSettingStore = defineStore(
   'setting',
   () => {
     // 是否折叠
-    const isCollapse = ref(true)
+    const isCollapse = ref(false)
     //中英文切换(默认中文)
     const language = ref('zh-cn')
     return {

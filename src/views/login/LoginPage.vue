@@ -10,6 +10,7 @@ import { useUserStore } from '@/stores';
 import router from '@/router'
 import { onMounted } from 'vue';
 
+const modules = import.meta.glob("../views/**/**.vue");
 
 // 登录信息
 const formData = ref({
@@ -54,10 +55,11 @@ const login = () => {
 
           ElMessage.success('登录成功')
           console.info("登录信息", resUser)
+
+          userStore.token = resUser.data.response.token
+          userStore.token_type = resUser.data.response.token_type
           // 记住我
           if (userStore.isRemember) {
-            userStore.token = resUser.data.response.token
-            userStore.token_type = resUser.data.response.token_type
             userStore.name = formData.value.name
             userStore.pass = formData.value.pass
           }
@@ -101,7 +103,8 @@ const login = () => {
                         children: [
                           {
                             path: child.path,
-                            component: () => import('@/views' + child.path +'.vue')
+                            component: () => modules[`../views/${child.path}.vue`]
+                            // component: () => import('..' + child.path + '.vue')
                           }
                         ]
                       });
@@ -111,7 +114,8 @@ const login = () => {
                   }
 
                 } else if (!item.IsButton && !item.IsHide) {
-                  //路由
+                  //路由 
+
                   router.addRoute({
                     path: item.path,
                     component: () => import('@/views/layout/LayoutContainer.vue'),
@@ -119,7 +123,8 @@ const login = () => {
                     children: [
                       {
                         path: item.path,
-                        component: () => import('@/views' + item.path)
+                        component: () => modules[`../views/${item.path}.vue`]
+                        // component: () => import('..' + item.path)
                       }
                     ]
                   });

@@ -16,7 +16,7 @@ import avatar from '@/assets/img/default.png'
 import { useUserStore, useSettingStore } from '@/stores'
 import { onMounted } from 'vue'
 import router from '@/router'
-import MenuItemContainer from './components/MenuItemContainer.vue'
+import MenuItemContainer from '@/views/layout/components/MenuItemContainer.vue'
 
 const userStore = useUserStore()
 const settingStore = useSettingStore()
