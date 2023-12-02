@@ -10,8 +10,16 @@ import { useUserStore } from '@/stores';
 import router from '@/router'
 import { onMounted } from 'vue';
 
-const modules = import.meta.glob("../views/**/**.vue");
 
+
+const vueFilePathList = {
+  ...import.meta.glob('@/views/*')
+  , ...import.meta.glob('@/views/*/*')
+  , ...import.meta.glob('@/views/*/*/*')
+  , ...import.meta.glob('@/views/*/*/*/*')
+  , ...import.meta.glob('@/views/*/*/*/*/*')
+}
+console.info("vue文件列表", vueFilePathList)
 // 登录信息
 const formData = ref({
   name: '',
@@ -84,55 +92,9 @@ const login = () => {
               //   ]
               // },
 
-              for (let index = 0; index < userStore.menu.length; index++) {
-                const item = userStore.menu[index];
-                if (item.children && item.children.filter(t => !t.IsButton && !t.IsHide).length > 0) {
 
+              addDynamicRoutes(userStore.menu)
 
-                  for (let kk = 0; kk < item.children.length; kk++) {
-                    //二级路由
-                    const child = item.children[kk];
-                    if (child.children && child.children.filter(t => !t.IsButton && !t.IsHide).length > 0) {
-                      //此处可递归
-                    } else if (!child.IsButton && !child.IsHide) {
-                      //路由
-                      router.addRoute({
-                        path: child.path,
-                        component: () => import('@/views/layout/LayoutContainer.vue'),
-                        redirect: child.path,
-                        children: [
-                          {
-                            path: child.path,
-                            component: () => modules[`../views/${child.path}.vue`]
-                            // component: () => import('..' + child.path + '.vue')
-                          }
-                        ]
-                      });
-                    } else {
-
-                    }
-                  }
-
-                } else if (!item.IsButton && !item.IsHide) {
-                  //路由 
-
-                  router.addRoute({
-                    path: item.path,
-                    component: () => import('@/views/layout/LayoutContainer.vue'),
-                    redirect: item.path,
-                    children: [
-                      {
-                        path: item.path,
-                        component: () => modules[`../views/${item.path}.vue`]
-                        // component: () => import('..' + item.path)
-                      }
-                    ]
-                  });
-                } else {
-
-                }
-
-              }
 
 
 
@@ -158,6 +120,57 @@ const login = () => {
       console.info('表单验证失败', err)
     })
 }
+
+// 动态加载路由
+const addDynamicRoutes = (menu) => {
+
+  for (let index = 0; index < menu.length; index++) {
+    const item = menu[index];
+    if (item.children && item.children.filter(t => !t.IsButton && !t.IsHide).length > 0) {
+      for (let kk = 0; kk < item.children.length; kk++) {
+        //二级路由
+        const child = item.children[kk];
+        if (child.children && child.children.filter(t => !t.IsButton && !t.IsHide).length > 0) {
+          //递归获取 
+          addDynamicRoutes(child.children)
+        } else if (!child.IsButton && !child.IsHide) {
+
+          //路由  
+          router.addRoute({
+            path: child.path,
+            component: () => import('@/views/layout/LayoutContainer.vue'),
+            redirect: child.path,
+            children: [
+              {
+                path: child.path,
+                component: vueFilePathList['/src/views' + child.path + '.vue']
+              }
+            ]
+          });
+        } else {
+          // 
+        }
+      }
+    } else if (!item.IsButton && !item.IsHide) {
+      //路由   
+      router.addRoute({
+        path: item.path,
+        component: () => import('@/views/layout/LayoutContainer.vue'),
+        redirect: item.path,
+        children: [
+          {
+            path: item.path,
+            component: vueFilePathList['/src/views' + item.path + '.vue']
+          }
+        ]
+      });
+    } else {
+      // 
+    }
+
+  }
+}
+
 // 测试信息
 const inputDemoAccount = (name, pass) => {
   formData.value.name = name

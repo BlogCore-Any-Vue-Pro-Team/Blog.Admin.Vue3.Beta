@@ -1,3 +1,3 @@
 <template>
-  接口管理
+  部门管理
 </template>

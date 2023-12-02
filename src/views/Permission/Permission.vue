@@ -1,3 +1,3 @@
 <template>
-  接口管理
+  菜单管理
 </template>

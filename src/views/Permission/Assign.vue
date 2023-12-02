@@ -1,3 +1,3 @@
 <template>
-  接口管理
+  权限分配
 </template>

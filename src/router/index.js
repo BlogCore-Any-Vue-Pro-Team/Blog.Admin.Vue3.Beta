@@ -41,15 +41,15 @@ const router = createRouter({
           component: () => import('@/views/article/ArticleChannel.vue')
         },
         {
-          path: '/user/profile',
+          path: '/User/profile',
           component: () => import('@/views/user/UserProfile.vue')
         },
         {
-          path: '/user/avatar',
+          path: '/User/avatar',
           component: () => import('@/views/user/UserAvatar.vue')
         },
         {
-          path: '/user/password',
+          path: '/User/password',
           component: () => import('@/views/user/UserPassword.vue')
         }
       ]
