@@ -7,19 +7,15 @@ import { User, Lock } from '@element-plus/icons-vue'
 import { ref, watch } from 'vue'
 // 记住我
 import { useUserStore } from '@/stores';
+//路由
 import router from '@/router'
+import { addDynamicRoutes } from '@/router'
 import { onMounted } from 'vue';
 
 
 
-const vueFilePathList = {
-  ...import.meta.glob('@/views/*')
-  , ...import.meta.glob('@/views/*/*')
-  , ...import.meta.glob('@/views/*/*/*')
-  , ...import.meta.glob('@/views/*/*/*/*')
-  , ...import.meta.glob('@/views/*/*/*/*/*')
-}
-console.info("vue文件列表", vueFilePathList)
+
+
 // 登录信息
 const formData = ref({
   name: '',
@@ -59,8 +55,7 @@ const login = () => {
       console.info('表单验证成功', res)
       userLogin(formData.value)
         .then((resUser) => {
-
-
+          
           ElMessage.success('登录成功')
           console.info("登录信息", resUser)
 
@@ -74,30 +69,13 @@ const login = () => {
           // 获取用户信息
           getInfoByToken({ token: userStore.token }).then((userInfo) => {
             userStore.uid = userInfo.data.response.uID
+
             // 获取菜单
             GetNavigationBar({ uid: userStore.uid }).then((menuInfo) => {
               userStore.menu = menuInfo.data.response.children
+
               // 添加vue router路由
-
-
-              // {
-              //   path: '/Permission',
-              //   component: () => import('@/views/layout/LayoutContainer.vue'),
-              //   redirect: '/Permission/Module',
-              //   children: [
-              //     {
-              //       path: '/Permission/Module',
-              //       component: () => import('@/views/Permission/Module.vue')
-              //     }
-              //   ]
-              // },
-
-
               addDynamicRoutes(userStore.menu)
-
-
-
-
 
               // 跳转路由
               router.replace('/')
@@ -121,55 +99,7 @@ const login = () => {
     })
 }
 
-// 动态加载路由
-const addDynamicRoutes = (menu) => {
 
-  for (let index = 0; index < menu.length; index++) {
-    const item = menu[index];
-    if (item.children && item.children.filter(t => !t.IsButton && !t.IsHide).length > 0) {
-      for (let kk = 0; kk < item.children.length; kk++) {
-        //二级路由
-        const child = item.children[kk];
-        if (child.children && child.children.filter(t => !t.IsButton && !t.IsHide).length > 0) {
-          //递归获取 
-          addDynamicRoutes(child.children)
-        } else if (!child.IsButton && !child.IsHide) {
-
-          //路由  
-          router.addRoute({
-            path: child.path,
-            component: () => import('@/views/layout/LayoutContainer.vue'),
-            redirect: child.path,
-            children: [
-              {
-                path: child.path,
-                component: vueFilePathList['/src/views' + child.path + '.vue']
-              }
-            ]
-          });
-        } else {
-          // 
-        }
-      }
-    } else if (!item.IsButton && !item.IsHide) {
-      //路由   
-      router.addRoute({
-        path: item.path,
-        component: () => import('@/views/layout/LayoutContainer.vue'),
-        redirect: item.path,
-        children: [
-          {
-            path: item.path,
-            component: vueFilePathList['/src/views' + item.path + '.vue']
-          }
-        ]
-      });
-    } else {
-      // 
-    }
-
-  }
-}
 
 // 测试信息
 const inputDemoAccount = (name, pass) => {

@@ -95,7 +95,7 @@ const handleCommand = async (key) => {
       <el-main>
         <router-view></router-view>
       </el-main>
-      <el-footer>我的UI框架 ©2023 Create By 繁星 & Power By Vue3</el-footer>
+      <el-footer>Blog.Admin ©2023 Create By 繁星 & Power By Vue3 & BCVP develop together</el-footer>
     </el-container>
   </el-container>
 </template>

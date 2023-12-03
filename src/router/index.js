@@ -10,7 +10,7 @@ import { useUserStore } from '@/stores/modules/user'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    
+
 
     {
       path: '/',
@@ -68,4 +68,57 @@ router.beforeEach((to, from) => {
   }
 })
 
+// vue文件列表
+export const vueFilePathList = {
+  ...import.meta.glob('@/views/*')
+  , ...import.meta.glob('@/views/*/*')
+  , ...import.meta.glob('@/views/*/*/*')
+  , ...import.meta.glob('@/views/*/*/*/*')
+  , ...import.meta.glob('@/views/*/*/*/*/*')
+}
+
+// 动态添加路由
+export const addRoute = (item) => {
+  // 添加路由   
+  router.addRoute({
+    path: item.path,
+    component: () => import('@/views/layout/LayoutContainer.vue'),
+    redirect: item.path,
+    children: [
+      {
+        path: item.path,
+        component: vueFilePathList['/src/views' + item.path + '.vue']
+      }
+    ]
+  });
+}
+export const addDynamicRoutes = (menu) => {
+
+  for (let index = 0; index < menu.length; index++) {
+    const item = menu[index];
+    if (item.children && item.children.filter(t => !t.IsButton && !t.IsHide).length > 0) {
+      for (let kk = 0; kk < item.children.length; kk++) {
+        //二级路由
+        const child = item.children[kk];
+        if (child.children && child.children.filter(t => !t.IsButton && !t.IsHide).length > 0) {
+          //递归获取 
+          addDynamicRoutes(child.children)
+        } else if (!child.IsButton && !child.IsHide) {
+          // 添加路由
+          addRoute(child)
+        } else {
+          // 
+        }
+      }
+    } else if (!item.IsButton && !item.IsHide) {
+      // 添加路由
+      addRoute(item)
+    } else {
+      // 
+    }
+
+  }
+
+
+}
 export default router
