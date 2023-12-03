@@ -10,11 +10,12 @@ import {
   CaretBottom,
   House,
   Expand,
-  Fold
+  Fold,
+  Close
 } from '@element-plus/icons-vue'
 import avatar from '@/assets/img/default.png'
 import { useUserStore, useSettingStore } from '@/stores'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import router from '@/router'
 import MenuItemContainer from '@/views/layout/components/MenuItemContainer.vue'
 
@@ -26,32 +27,73 @@ onMounted(() => { })
 const handleCommand = async (key) => {
   if (key === 'logout') {
     // 退出操作
-    await ElMessageBox.confirm('你确认要进行退出么', '温馨提示', {
+    await ElMessageBox.confirm('你确认要进行退出么?', '温馨提示', {
       type: 'warning',
       confirmButtonText: '确认',
       cancelButtonText: '取消'
     })
 
     // 清除本地的数据 (token + user信息)
-    userStore.setToken('')
+    userStore.logout()
     router.push('/login')
   } else {
     // 跳转操作
     router.push(`/user/${key}`)
   }
 }
+
+// 获取导航面包屑
+const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
+  if (!isDeep && curRoute.value.path === '/') return ['首页']
+
+  if (!breadcrumbList)
+    breadcrumbList = []
+
+  if (!isDeep) {
+    if (curRoute.value.meta.parent) {
+      getBreadcrumb(curRoute.value.meta.parent, true, breadcrumbList)
+    }
+    breadcrumbList.push(curRoute.value.meta.title)
+  }
+  else {
+    if (curRoute.meta.parent) {
+      getBreadcrumb(curRoute.meta.parent, true, breadcrumbList)
+    }
+    breadcrumbList.push(curRoute.meta.title)
+  }
+
+  return breadcrumbList;
+}
+
+// 内容顶部 
+const handleClickTag = (tag, curIndex) => {
+  for (let index = 0; index < userStore.tagsList.length; index++) {
+    const element = userStore.tagsList[index];
+    if (tag === element) {
+      element.active = true
+    } else {
+      element.active = false
+    }
+  }
+} 
 </script>
 
 <template>
   <el-container class="layout-container">
     <el-aside :width="settingStore.isCollapse ? '65px' : '200px'">
-      <div class="el-aside__logo" v-show="!settingStore.isCollapse"></div>
-      <el-menu active-text-color="#ffd04b" background-color="#2f3e52" :default-active="$route.path" text-color="#fff"
-        router :collapse="settingStore.isCollapse">
+      <el-scrollbar height="100%">
+        <div class="el-aside__logo" v-show="!settingStore.isCollapse"></div>
 
-        <MenuItemContainer :data="userStore.menu"></MenuItemContainer>
-        
-      </el-menu>
+        <el-scrollbar height="calc(100vh - 70px)">
+          <el-menu :collapse-transition="false" active-text-color="#ffd04b" background-color="#2f3e52"
+            :default-active="$route.path" text-color="#fff" router :collapse="settingStore.isCollapse">
+
+            <MenuItemContainer :data="userStore.menu"></MenuItemContainer>
+
+          </el-menu>
+        </el-scrollbar>
+
+      </el-scrollbar>
     </el-aside>
     <el-container>
       <el-header>
@@ -67,8 +109,13 @@ const handleCommand = async (key) => {
                 <Fold />
               </el-icon>
             </el-col>
-            <el-col :span="1.5" class="header-nav-title"> 首页</el-col>
-            <el-col :span="1.5"></el-col>
+            <el-col :span="1.5">
+              <el-breadcrumb separator="/" class="header-nav-box">
+                <el-breadcrumb-item v-for="(item, index) in getBreadcrumb(router.currentRoute)" :key="index"><span
+                    class="header-nav-title">{{ item }}</span></el-breadcrumb-item>
+
+              </el-breadcrumb>
+            </el-col>
           </el-row>
 
         </div>
@@ -92,22 +139,36 @@ const handleCommand = async (key) => {
           </template>
         </el-dropdown>
       </el-header>
-      <el-main>
-        <router-view></router-view>
+      <el-main style="padding: 0px;">
+        <div class="tags">
+          <span :class="{ 'active': tag.active }" v-for="(tag, index) in userStore.tagsList" :key="tag.path"
+            @click="userStore.setOneActiveTag(tag, index)"  class="tags-view-item">
+            {{ tag.title }}
+            <el-icon class="el-icon-close" @click.prevent.stop="userStore.removeOneTag(tag)">
+              <Close />
+            </el-icon>
+          </span>
+        </div>
+        <el-scrollbar style="height: calc(100% - 40px);">
+          <router-view></router-view>
+        </el-scrollbar>
       </el-main>
-      <el-footer>Blog.Admin ©2023 Create By 繁星 & Power By Vue3 & BCVP develop together</el-footer>
+      <el-footer>BCVP PRO ©2023 Create By 繁星 & Power By Vue3 & BCVP develop together</el-footer>
     </el-container>
   </el-container>
 </template>
 <style>
 .fa {
-    vertical-align: baseline;
-    margin-right: 10px;
+  vertical-align: baseline;
+  margin-right: 10px;
 }
-.el-menu--collapse i{
+
+.el-menu--collapse i {
   font-size: 20px !important;
 }
-.el-menu--collapse span,.el-menu--collapse .el-sub-menu__icon-arrow{
+
+.el-menu--collapse span,
+.el-menu--collapse .el-sub-menu__icon-arrow {
   display: none !important;
 }
 </style>
@@ -131,7 +192,7 @@ const handleCommand = async (key) => {
   .el-header {
     background-color: #2f3e52;
     border-left: 1px #606266 solid;
-    color: #606266;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -168,11 +229,59 @@ const handleCommand = async (key) => {
       margin-top: 10px;
     }
 
-    .header-nav-title {
+    .header-nav-box {
+      margin-top: 15px;
       margin-left: 10px;
-      line-height: 45px;
-      font-size: 16px;
+    }
+
+    .header-nav-title {
+      color: #606266;
+      font-size: 14px;
     }
   }
+}
+
+.tags {
+  height: 40px;
+  line-height: 40px;
+  border: 1px solid #f0f0f0;
+  background: #f0f0f0;
+  box-sizing: border-box;
+}
+
+
+.tags .tags-view-item {
+  border: 1px solid #d8dce5;
+  color: #495060;
+  background: #fff;
+  display: inline-block;
+  height: 26px;
+  line-height: 26px;
+  padding: 0 8px;
+  font-size: 12px;
+  margin-left: 5px;
+  margin-top: 4px;
+  cursor:pointer;
+}
+
+.tags .tags-view-item.active::before {
+  content: "";
+  background: #2d8cf0;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  position: relative;
+  margin-right: 2px;
+}
+
+.tags .tags-view-item .el-icon-close {
+  font-size: 10px;
+}
+
+.tags .tags-view-item .el-icon-close:hover {
+  background-color: #ef2b74;
+  color: #fff;
+  border-radius: 20px;
 }
 </style>

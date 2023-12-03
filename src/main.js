@@ -4,7 +4,7 @@ import { createApp } from 'vue'
 import App from '@/App.vue'
 import router from '@/router'
 import pinia from '@/stores'
-import { addDynamicRoutes } from '@/router'
+
 
 import 'font-awesome/css/font-awesome.min.css'
 
@@ -16,6 +16,7 @@ app.use(pinia)
 
 // 网页刷新后动态路由添加
 // (此处顺序必须在app.use(router)之前 app.use(pinia)之后)
+import { addDynamicRoutes } from '@/router'
 import { useUserStore } from "@/stores";
 const userStore = useUserStore()
 if (userStore.token && userStore.menu) {

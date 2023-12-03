@@ -78,8 +78,9 @@ export const vueFilePathList = {
 }
 
 // 动态添加路由
-export const addRoute = (item) => {
-  // 添加路由   
+export const addRoute = (item, parent) => {
+
+  let meta = { ...item.meta, ...{ parent } }
   router.addRoute({
     path: item.path,
     component: () => import('@/views/layout/LayoutContainer.vue'),
@@ -87,32 +88,35 @@ export const addRoute = (item) => {
     children: [
       {
         path: item.path,
-        component: vueFilePathList['/src/views' + item.path + '.vue']
+        component: vueFilePathList['/src/views' + item.path + '.vue'],
+        meta: meta
       }
     ]
   });
 }
-export const addDynamicRoutes = (menu) => {
+// 动态路由
+export const addDynamicRoutes = (menu, parent) => {
 
   for (let index = 0; index < menu.length; index++) {
+
     const item = menu[index];
-    if (item.children && item.children.filter(t => !t.IsButton && !t.IsHide).length > 0) {
-      for (let kk = 0; kk < item.children.length; kk++) {
+    if (item.children && item.children.filter(t => !t.IsButton).length > 0) {
+      for (let cIndex = 0; cIndex < item.children.length; cIndex++) {
         //二级路由
-        const child = item.children[kk];
-        if (child.children && child.children.filter(t => !t.IsButton && !t.IsHide).length > 0) {
+        const child = item.children[cIndex];
+        if (child.children && child.children.filter(t => !t.IsButton && t.path != '-').length > 0) {
           //递归获取 
-          addDynamicRoutes(child.children)
-        } else if (!child.IsButton && !child.IsHide) {
+          addDynamicRoutes(child.children, child)
+        } else if (!child.IsButton && child.path != '-') {
           // 添加路由
-          addRoute(child)
+          addRoute(child, item)
         } else {
           // 
         }
       }
-    } else if (!item.IsButton && !item.IsHide) {
+    } else if (!item.IsButton && item.path != '-') {
       // 添加路由
-      addRoute(item)
+      addRoute(item, parent)
     } else {
       // 
     }

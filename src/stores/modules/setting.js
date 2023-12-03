@@ -11,9 +11,10 @@ export const useSettingStore = defineStore(
     const isCollapse = ref(false)
     //中英文切换(默认中文)
     const language = ref('zh-cn')
+
     return {
       isCollapse,
-      language
+      language,
     }
   },
   {

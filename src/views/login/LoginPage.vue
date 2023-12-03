@@ -27,20 +27,14 @@ onMounted(() => {
   console.info('进入onMounted生命周期')
   // 记住我
   if (userStore.isRemember) {
-    console.info("isRemember", userStore.isRemember)
-    console.info("name", userStore.name)
-    console.info("pass", userStore.pass)
-
     formData.value.name = userStore.name
     formData.value.pass = userStore.pass
   }
 })
 // 监听变量
 watch(() => userStore.isRemember, () => {
-  userStore.name = ''
-  userStore.pass = ''
-  userStore.token = ''
-  userStore.token_type = ''
+  userStore.setName('')
+  userStore.setPass('')
 })
 // 校验信息
 const formRules = {
@@ -55,24 +49,24 @@ const login = () => {
       console.info('表单验证成功', res)
       userLogin(formData.value)
         .then((resUser) => {
-          
+
           ElMessage.success('登录成功')
           console.info("登录信息", resUser)
 
-          userStore.token = resUser.data.response.token
-          userStore.token_type = resUser.data.response.token_type
+          userStore.setToken(resUser.data.response.token)
+          userStore.setTokenType(resUser.data.response.token_type)
           // 记住我
           if (userStore.isRemember) {
-            userStore.name = formData.value.name
-            userStore.pass = formData.value.pass
+            userStore.setName(formData.value.name)
+            userStore.setPass(formData.value.pass)
           }
           // 获取用户信息
           getInfoByToken({ token: userStore.token }).then((userInfo) => {
-            userStore.uid = userInfo.data.response.uID
+            userStore.setUid(userInfo.data.response.uID)
 
             // 获取菜单
             GetNavigationBar({ uid: userStore.uid }).then((menuInfo) => {
-              userStore.menu = menuInfo.data.response.children
+              userStore.setMenu(menuInfo.data.response.children)
 
               // 添加vue router路由
               addDynamicRoutes(userStore.menu)
@@ -94,7 +88,7 @@ const login = () => {
         })
     })
     .catch((err) => {
-      ElMessage.error('请填信息');
+      ElMessage.error('请填写信息');
       console.info('表单验证失败', err)
     })
 }
