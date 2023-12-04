@@ -11,7 +11,8 @@ import {
   House,
   Expand,
   Fold,
-  Close
+  Close,
+  ArrowDown
 } from '@element-plus/icons-vue'
 import avatar from '@/assets/img/default.png'
 import { useUserStore, useSettingStore } from '@/stores'
@@ -24,7 +25,8 @@ const settingStore = useSettingStore()
 
 onMounted(() => { })
 
-const handleCommand = async (key) => {
+
+const handleCommand = async (key, name) => {
   if (key === 'logout') {
     // 退出操作
     await ElMessageBox.confirm('你确认要进行退出么?', '温馨提示', {
@@ -36,9 +38,34 @@ const handleCommand = async (key) => {
     // 清除本地的数据 (token + user信息)
     userStore.logout()
     router.push('/login')
+
   } else {
     // 跳转操作
-    router.push(`/user/${key}`)
+    userStore.setOneActiveTag({
+      path: `/user/${key}`,
+      title: name
+    })
+  }
+}
+
+const handleNavCommand = async (key) => {
+  if (key === 'other') {
+    // 退出操作
+    await ElMessageBox.confirm('你确定要关闭其他页面?', '温馨提示', {
+      type: 'warning',
+      confirmButtonText: '确认',
+      cancelButtonText: '取消'
+    })
+    userStore.closeOtherPage()
+
+  } else if (key === 'all') {
+    // 退出操作
+    await ElMessageBox.confirm('你确定要关闭所有页面?', '温馨提示', {
+      type: 'warning',
+      confirmButtonText: '确认',
+      cancelButtonText: '取消'
+    })
+    userStore.closeAllPage()
   }
 }
 
@@ -64,18 +91,6 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
 
   return breadcrumbList;
 }
-
-// 内容顶部 
-const handleClickTag = (tag, curIndex) => {
-  for (let index = 0; index < userStore.tagsList.length; index++) {
-    const element = userStore.tagsList[index];
-    if (tag === element) {
-      element.active = true
-    } else {
-      element.active = false
-    }
-  }
-} 
 </script>
 
 <template>
@@ -119,7 +134,7 @@ const handleClickTag = (tag, curIndex) => {
           </el-row>
 
         </div>
-        <el-dropdown placement="bottom-end" @command="handleCommand">
+        <el-dropdown placement="bottom-end">
           <!-- 展示给用户，默认看到的 -->
           <span class="el-dropdown__box">
             <el-avatar :src="avatar" />
@@ -131,23 +146,38 @@ const handleClickTag = (tag, curIndex) => {
           <!-- 折叠的下拉部分 -->
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="profile" :icon="User">基本资料</el-dropdown-item>
-              <el-dropdown-item command="avatar" :icon="Crop">更换头像</el-dropdown-item>
-              <el-dropdown-item command="password" :icon="EditPen">重置密码</el-dropdown-item>
-              <el-dropdown-item command="logout" :icon="SwitchButton">退出登录</el-dropdown-item>
+              <el-dropdown-item :icon="User" v-on:click="handleCommand('profile', '基本资料')">基本资料</el-dropdown-item>
+              <el-dropdown-item :icon="Crop" v-on:click="handleCommand('avatar', '更换头像')">更换头像</el-dropdown-item>
+              <el-dropdown-item :icon="EditPen" v-on:click="handleCommand('password', '重置密码')">重置密码</el-dropdown-item>
+              <el-dropdown-item :icon="SwitchButton" v-on:click="handleCommand('logout', '退出登录')">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
       </el-header>
       <el-main style="padding: 0px;">
         <div class="tags">
-          <span :class="{ 'active': tag.active }" v-for="(tag, index) in userStore.tagsList" :key="tag.path"
-            @click="userStore.setOneActiveTag(tag, index)"  class="tags-view-item">
-            {{ tag.title }}
-            <el-icon class="el-icon-close" @click.prevent.stop="userStore.removeOneTag(tag)">
-              <Close />
-            </el-icon>
-          </span>
+          <!-- 左 -->
+          <div>
+            <span :class="{ 'active': tag.active }" v-for="(tag, index) in userStore.tagsList" :key="tag.path"
+              @click="userStore.setOneActiveTag(tag, index)" class="tags-view-item">
+              {{ tag.title }}
+              <el-icon class="el-icon-close" @click.prevent.stop="userStore.removeOneTag(tag)">
+                <Close />
+              </el-icon>
+            </span>
+          </div>
+          <!-- 右 -->
+          <div>
+            <el-dropdown @command="handleNavCommand">
+              <el-button type="primary" plain><el-icon class="el-icon--right"><arrow-down /></el-icon></el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="other">关闭其他</el-dropdown-item>
+                  <el-dropdown-item command="all">关闭所有</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
         </div>
         <el-scrollbar style="height: calc(100% - 40px);">
           <router-view></router-view>
@@ -247,6 +277,8 @@ const handleClickTag = (tag, curIndex) => {
   border: 1px solid #f0f0f0;
   background: #f0f0f0;
   box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
 }
 
 
@@ -261,7 +293,7 @@ const handleClickTag = (tag, curIndex) => {
   font-size: 12px;
   margin-left: 5px;
   margin-top: 4px;
-  cursor:pointer;
+  cursor: pointer;
 }
 
 .tags .tags-view-item.active::before {

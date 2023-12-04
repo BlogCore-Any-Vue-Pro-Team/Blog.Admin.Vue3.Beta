@@ -15,22 +15,24 @@ export const useUserStore = defineStore(
 
     // 菜单缓存
     // 首页
-    const firstPage = ref({
+    const firstPage = {
       path: '/',
       title: '首页',
       active: true
-    })
+    }
     //上页
     const prePage = ref({})
     const curPage = ref({})
     // 列表
-    const tagsList = ref([firstPage.value])
+    const tagsList = ref([firstPage])
 
     // 设置一个激活导航
     const setOneActiveTag = (newTag) => {
 
+      console.info("tagsList", tagsList)
+      console.info("newTag", newTag)
       //点了自己
-      if(newTag.path === curPage.value.path) return;
+      if (newTag.path === curPage.value.path) return;
 
       let isRealNew = false
       for (let index = 0; index < tagsList.value.length; index++) {
@@ -56,7 +58,7 @@ export const useUserStore = defineStore(
 
     // 删除一个导航
     const removeOneTag = (tag) => {
-      
+
       //不允许删除首页
       if (tag.path === '/') return;
 
@@ -70,36 +72,61 @@ export const useUserStore = defineStore(
         if (prePage.value.path) {
           setOneActiveTag(prePage.value)
         } else {
-          setOneActiveTag(firstPage.value)
+          setOneActiveTag(firstPage)
         }
         prePage.value = {}
       }
     }
 
+    // 关闭其他页面
+    const closeOtherPage = () => {
+      if (firstPage.path === curPage.value.path) {
+        firstPage.active = true
+        tagsList.value = [firstPage]
+      } else {
+        firstPage.active = false
+        tagsList.value = [firstPage, curPage.value]
+        setOneActiveTag(curPage.value)
+      }
 
+    }
+
+    // 关闭所有页面
+    const closeAllPage = () => {
+      tagsList.value = [firstPage]
+      setOneActiveTag(firstPage)
+    }
+
+
+    // 设置token
     const setToken = (newToken) => {
       token.value = newToken
     }
-
+    // 设置token类型
     const setTokenType = (newTokenType) => {
       token_type.value = newTokenType
     }
+    // 设置菜单
     const setMenu = (newMenu) => {
       menu.value = newMenu
     }
+    // 设置用户id
     const setUid = (newUid) => {
       uid.value = newUid
     }
 
 
-
+    // 退出登录
     const logout = () => {
       token.value = ''
       token_type.value = ''
       menu.value = []
       uid.value = ''
-      tagsList.value = tagsList.value.splice(0, tagsList.value.length)
+      firstPage.active = true
       tagsList.value = [firstPage]
+      prePage.value = {}
+      curPage.value = {}
+
     }
 
 
@@ -125,6 +152,7 @@ export const useUserStore = defineStore(
       isRemember,
       tagsList,
       prePage,
+      curPage,
       setName,
       setPass,
       setToken,
@@ -133,7 +161,9 @@ export const useUserStore = defineStore(
       setUid,
       logout,
       setOneActiveTag,
-      removeOneTag
+      removeOneTag,
+      closeOtherPage,
+      closeAllPage
     }
   },
   {
