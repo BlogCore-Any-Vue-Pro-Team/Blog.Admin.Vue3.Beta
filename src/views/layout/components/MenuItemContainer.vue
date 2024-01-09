@@ -22,7 +22,7 @@ const setActiveTag = (item) => {
 
 </script>
 <template>
-  <transition v-for="item in data" :key="item.id">
+  <template v-for="item in data" :key="item.id">
     <el-sub-menu v-if="item.children && item.children.filter(t => !t.IsButton && !t.IsHide).length > 0" :index="item.id">
       <template #title>
         <i v-if="item.children && item.children.length > 0 && item.iconCls && !item.IsButton" class="fa"
@@ -34,5 +34,5 @@ const setActiveTag = (item) => {
     </el-sub-menu>
     <el-menu-item @click="setActiveTag(item)" v-else-if="!item.IsButton && !item.IsHide" :index="item.path">{{ item.name
     }}</el-menu-item>
-  </transition>
+  </template>
 </template>

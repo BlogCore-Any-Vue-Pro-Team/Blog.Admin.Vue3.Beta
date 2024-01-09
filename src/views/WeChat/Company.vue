@@ -1,6 +1,12 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
-import { getDepartmentTreeTable, removeDepartment, removeBatchDepartment, editDepartment, addDepartment, getDepartmentTree } from '@/api/dep.js'
+import {
+  getWeChatCompany,
+  removeWeChatCompany,
+  addWeWeChatCompany,
+  updateWeChatCompany,
+  batchDeleteWeChatCompany,
+} from '@/api/wechat.js'
 
 
 // 表格初始化
@@ -39,33 +45,28 @@ watch(() => filters.value.size, () => {
 
 
 //加载数据
-const GetDepartmentTreeTable = () => {
-  HandleClearTable()
-  getDepartmentTreeTable(filters.value).then(res => {
-    tableData.value = res.data.response.data
-    tableTotal.value = res.data.response.dataCount
-  })
-}
 onMounted(() => {
   HandleSearch()
 })
 
 
 //新增&编辑操作
+const isAdd = ref(false)
 const dialogVisible = ref(false)
 const formData = ref({})
 const refForm = ref()
 const ruleForm = {
-  Name: [
-    { required: true, message: '部门名称不能为空', trigger: 'change' },
+  CompanyID: [
+    { required: true, message: '链客户代码不能为空', trigger: 'change' },
   ],
-  Leader: [
-    { required: true, message: '负责人不能为空', trigger: 'change' },
+  CompanyName: [
+    { required: true, message: '客户名称不能为空', trigger: 'change' },
   ]
 }
 //新增
 const HandleAdd = () => {
-  formData.value = { Pid: 0, CodeRelationship: '0', Status: true }
+  isAdd.value = true
+  formData.value = { Enabled: true }
   dialogVisible.value = true
 }
 //编辑
@@ -74,6 +75,7 @@ const HandleEdit = (row) => {
     ElMessage.error('请选择要操作的数据!')
     return;
   }
+  isAdd.value = false
   formData.value = JSON.parse(JSON.stringify(row))
   dialogVisible.value = true
 }
@@ -85,7 +87,7 @@ const HandleDel = (row) => {
   }
   ElMessageBox.confirm('确定删除么?')
     .then(() => {
-      removeDepartment({ id: row.Id }).then((res) => {
+      removeWeChatCompany({ id: row.CompanyID }).then((res) => {
         HandleSearch()
         ElMessage.success('删除成功')
       })
@@ -105,8 +107,8 @@ const HandleBatchDel = (rows) => {
   }
   ElMessageBox.confirm('确定删除么?')
     .then(() => {
-      let ids = rows.map(t => t.Id)
-      removeBatchDepartment(ids).then((res) => {
+      let ids = rows.map(t => t.CompanyID)
+      batchDeleteWeChatCompany(ids).then((res) => {
         HandleSearch()
         ElMessage.success('删除成功')
       })
@@ -126,19 +128,19 @@ const HandleSubmit = () => {
     }
     ElMessageBox.confirm('确定提交么?')
       .then(() => {
-        if (formData.value.Id) {
+        if (!isAdd.value) {
           //编辑
-          editDepartment(formData.value).then((res) => {
-            HandleSearch()
-            dialogVisible.value = false
-            ElMessage.success(res.data.msg || '添加成功')
-          })
-        } else {
-          //新增
-          addDepartment(formData.value).then((res) => {
+          updateWeChatCompany(formData.value).then((res) => {
             HandleSearch()
             dialogVisible.value = false
             ElMessage.success(res.data.msg || '编辑成功')
+          })
+        } else {
+          //新增
+          addWeWeChatCompany(formData.value).then((res) => {
+            HandleSearch()
+            dialogVisible.value = false
+            ElMessage.success(res.data.msg || '添加成功')
           })
         }
       })
@@ -164,8 +166,14 @@ const HandleSearch = (page) => {
 
   if (page) filters.value.page = page
 
-  GetDepartmentTreeTable()
+  HandleClearTable()
+
+  getWeChatCompany(filters.value).then(res => {
+    tableData.value = res.data.response.data;
+    tableTotal.value = res.data.response.dataCount;
+  });
 }
+
 
 </script>
 <template>
@@ -197,20 +205,20 @@ const HandleSearch = (page) => {
   </el-row>
   <!-- 内容 -->
   <el-table ref="refTable" :data="tableData" highlight-current-row @selection-change="HandleSelectChange"
-    @row-click="HandleClickRow" border :tree-props="{ children: 'children', hasChildren: 'hasChildren' }">
+    @row-click="HandleClickRow" border>
     <el-table-column type="selection" width="50"></el-table-column>
-    <el-table-column prop="Name" label="部门名称" width="200"></el-table-column>
-    <el-table-column prop="Id" label="部门ID" width="200"></el-table-column>
-    <el-table-column prop="CodeRelationship" label="上级" min-width="80"></el-table-column>
-    <el-table-column prop="Leader" label="负责人" width="120"></el-table-column>
-    <el-table-column prop="OrderSort" label="排序" width="60"></el-table-column>
-    <el-table-column prop="Status" label="是否有效" width="90" align="center">
+    <el-table-column prop="CompanyID" label="客户代码" width="150"></el-table-column>
+    <el-table-column prop="CompanyName" label="客户名称" min-width="200"></el-table-column>
+    <el-table-column prop="CompanyIP" label="客户IP" min-width="200"></el-table-column>
+    <el-table-column prop="CompanyAPI" label="客户API" width="100"></el-table-column>
+    <el-table-column prop="CompanyRemark" label="备注" width="100"></el-table-column>
+
+    <el-table-column prop="serverenable" label="是否启用" width sortable>
       <template #default="{ row }">
-        <el-tag :type="row.Status ? 'success' : 'danger'" disable-transitions>{{ !row.Status ? "否" : "是"
-        }}</el-tag>
+        <el-tag v-if="row.Enabled" type="success">启用</el-tag>
+        <el-tag v-else type="danger">禁用</el-tag>
       </template>
     </el-table-column>
-
     <el-table-column prop="CreateTime" label="创建时间" width="180">
     </el-table-column>
     <el-table-column prop="ModifyTime" label="更新时间" width="180">
@@ -227,29 +235,25 @@ const HandleSearch = (page) => {
     </el-col>
   </el-row>
   <!-- 弹窗 -->
-  <el-dialog v-model="dialogVisible" :title="formData.Id ? '编辑' : '添加'" width="450px" :before-close="handleClose">
-    <el-form ref="refForm" :model="formData" :rules="ruleForm" label-width="80px" status-icon>
-
-      <el-form-item label="部门名称" prop="Name">
-        <el-input v-model="formData.Name" auto-complete="off"></el-input>
+  <el-dialog v-model="dialogVisible" :title="isAdd ? '添加' : '编辑'" width="450px" :before-close="handleClose">
+    <el-form ref="refForm" :model="formData" :rules="ruleForm" label-width="120px" status-icon>
+      <el-form-item label="客户代码" prop="CompanyID">
+        <el-input v-model="formData.CompanyID" auto-complete="off" :disabled="!isAdd"></el-input>
       </el-form-item>
-      <el-form-item label="上级关系" prop="CodeRelationship">
-        <el-tooltip placement="top">
-          <template #content> 以','号结尾，方便下属部门统一查询</template>
-          <el-input v-model="formData.CodeRelationship" disabled auto-complete="off"></el-input>
-        </el-tooltip>
+      <el-form-item label="客户名称" prop="CompanyName">
+        <el-input v-model="formData.CompanyName" auto-complete="off"></el-input>
       </el-form-item>
-      <el-form-item label="负责人" prop="Leader">
-        <el-input v-model="formData.Leader" auto-complete="off"></el-input>
+      <el-form-item label="客户IP" prop="CompanyIP">
+        <el-input v-model="formData.CompanyIP" auto-complete="off"></el-input>
       </el-form-item>
-      <el-form-item label="排序" prop="OrderSort">
-        <el-input v-model="formData.OrderSort" auto-complete="off"></el-input>
+      <el-form-item label="客户API" prop="CompanyAPI">
+        <el-input v-model="formData.CompanyAPI" auto-complete="off"></el-input>
       </el-form-item>
-      <el-form-item label="是否有效" prop="Status" width sortable>
-        <el-switch v-model="formData.Status"></el-switch>
+      <el-form-item label="状态" prop="Enabled">
+        <el-switch v-model="formData.Enabled" active-text="启用" inactive-text="禁用" />
       </el-form-item>
-      <el-form-item prop="PidArr" label="父级部门" width sortable>
-        <el-input v-model="formData.PidArr" auto-complete="off"></el-input>
+      <el-form-item label="备注" prop="CompanyRemark">
+        <el-input v-model="formData.CompanyRemark" auto-complete="off"></el-input>
       </el-form-item>
     </el-form>
 

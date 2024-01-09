@@ -18,12 +18,6 @@ instance.interceptors.request.use(
         text: '系统正在加载数据中...',
         background: 'rgba(0, 0, 0, 0.7)',
       })
-
-      // loadingInstance = ElLoading.service({
-      //   lock: true,
-      //   text: 'Loading',
-      //   background: 'rgba(0, 0, 0, 0.7)',
-      // })
     }
     // 携带token
     const userStore = useUserStore()
@@ -44,7 +38,7 @@ instance.interceptors.response.use(
       return res
     }
     // 处理失败,给错误提示
-    ElMessage.error(res.data.msg || '服务异常')
+    ElMessage.error(res.data.msg || '服务繁忙')
     return Promise.reject(res.data)
   },
   (err) => {
@@ -52,7 +46,8 @@ instance.interceptors.response.use(
     // 响应出错
     // 处理401错误
     if (err.response?.status === 401) {
-      router.push('/login')
+      // router.push('/login')
+      router.replace('/login')
     }
     // 错误默认情况
     console.info('异常错误', err)

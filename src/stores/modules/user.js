@@ -29,8 +29,8 @@ export const useUserStore = defineStore(
     // 设置一个激活导航
     const setOneActiveTag = (newTag) => {
 
-      console.info("tagsList", tagsList)
-      console.info("newTag", newTag)
+      // console.info("tagsList", tagsList)
+      // console.info("newTag", newTag)
       //点了自己
       if (newTag.path === curPage.value.path) return;
 

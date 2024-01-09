@@ -23,9 +23,43 @@ import MenuItemContainer from '@/views/layout/components/MenuItemContainer.vue'
 const userStore = useUserStore()
 const settingStore = useSettingStore()
 
-onMounted(() => { })
+
+// 手机适配
+const showDiyElement = ref(true)
+const isMobile = ref(false)
+const toggleDiyElement = () => {
+  showDiyElement.value = !showDiyElement.value;
+  checkScreenWidth()
+}
+const hideDiyElement = () => {
+  showDiyElement.value = false;
+  checkScreenWidth()
+}
+const checkScreenWidth = () => {
+  if (window.innerWidth <= 600) {
+    settingStore.isCollapse = false
+    isMobile.value = true
+  } else {
+    isMobile.value = false
+  }
+}
+const clickCrumb = (flag) => {
+  if (window.innerWidth <= 600) {
+    showDiyElement.value = true
+  }
+  settingStore.isCollapse = flag
+  checkScreenWidth()
+}
+
+onMounted(() => {
+  checkScreenWidth()
+  showDiyElement.value = false
+  window.addEventListener('resize', checkScreenWidth);
+})
 
 
+
+// 其他
 const handleCommand = async (key, name) => {
   if (key === 'logout') {
     // 退出操作
@@ -74,7 +108,7 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
   if (!isDeep && curRoute.value.path === '/') return ['首页']
 
   if (!breadcrumbList)
-    breadcrumbList = []
+    breadcrumbList = ['首页']
 
   if (!isDeep) {
     if (curRoute.value.meta.parent) {
@@ -95,79 +129,91 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
 
 <template>
   <el-container class="layout-container">
-    <el-aside :width="settingStore.isCollapse ? '65px' : '200px'">
-      <el-scrollbar height="100%">
-        <div class="el-aside__logo" v-show="!settingStore.isCollapse"></div>
-
-        <el-scrollbar height="calc(100vh - 70px)">
-          <el-menu :collapse-transition="false" active-text-color="#ffd04b" background-color="#2f3e52"
-            :default-active="$route.path" text-color="#fff" router :collapse="settingStore.isCollapse">
-
-            <MenuItemContainer :data="userStore.menu"></MenuItemContainer>
-
-          </el-menu>
-        </el-scrollbar>
-
+    <el-aside v-if="!isMobile" ref="myLeft" :width="settingStore.isCollapse ? '65px' : '200px'">
+      <!-- 左侧菜单 -->
+      <div class="left-logo" v-show="!settingStore.isCollapse">繁星</div>
+      <el-scrollbar :style="{ height: (settingStore.isCollapse ? 'calc(100vh)' : 'calc(100vh - 70px)') }">
+        <el-menu :collapse-transition="false" active-text-color="#ffd04b" background-color="#2f3e52"
+          :default-active="$route.path" text-color="#fff" router :collapse="settingStore.isCollapse">
+          <MenuItemContainer :data="userStore.menu"></MenuItemContainer>
+        </el-menu>
       </el-scrollbar>
     </el-aside>
+    <div v-if="isMobile && showDiyElement">
+      <!-- 左侧菜单(手机) -->
+      <el-scrollbar class="overlay-body">
+        <el-menu :collapse-transition="false" active-text-color="#ffd04b" background-color="#2f3e52"
+          :default-active="$route.path" text-color="#fff" router :collapse="settingStore.isCollapse">
+          <MenuItemContainer :data="userStore.menu"></MenuItemContainer>
+        </el-menu>
+      </el-scrollbar>
+      <!-- 遮罩层 -->
+      <div v-if="showDiyElement" class="diy-element">
+        <div class="overlay" @click="hideDiyElement"></div>
+      </div>
+    </div>
     <el-container>
-      <el-header>
-        <div class="header-left">
-          <el-row>
-            <el-col :span="1.5">
-              <el-icon class="collapse" v-if="settingStore.isCollapse"
-                @click="settingStore.isCollapse = !settingStore.isCollapse">
-                <Expand />
-              </el-icon>
-              <el-icon class="collapse" v-if="!settingStore.isCollapse"
-                @click="settingStore.isCollapse = !settingStore.isCollapse">
-                <Fold />
-              </el-icon>
-            </el-col>
-            <el-col :span="1.5">
-              <el-breadcrumb separator="/" class="header-nav-box">
-                <el-breadcrumb-item v-for="(item, index) in getBreadcrumb(router.currentRoute)" :key="index"><span
-                    class="header-nav-title">{{ item }}</span></el-breadcrumb-item>
-
-              </el-breadcrumb>
-            </el-col>
-          </el-row>
-
-        </div>
-        <el-dropdown placement="bottom-end">
-          <!-- 展示给用户，默认看到的 -->
-          <span class="el-dropdown__box">
-            <el-avatar :src="avatar" />
-            <el-icon>
-              <CaretBottom />
-            </el-icon>
-          </span>
-
-          <!-- 折叠的下拉部分 -->
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item :icon="User" v-on:click="handleCommand('profile', '基本资料')">基本资料</el-dropdown-item>
-              <el-dropdown-item :icon="Crop" v-on:click="handleCommand('avatar', '更换头像')">更换头像</el-dropdown-item>
-              <el-dropdown-item :icon="EditPen" v-on:click="handleCommand('password', '重置密码')">重置密码</el-dropdown-item>
-              <el-dropdown-item :icon="SwitchButton" v-on:click="handleCommand('logout', '退出登录')">退出登录</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </el-header>
-      <el-main style="padding: 0px;">
-        <div class="tags">
-          <!-- 左 -->
+      <!-- 顶部 -->
+      <el-header class="el-header-one">
+        <div class="header-top">
           <div>
-            <span :class="{ 'active': tag.active }" v-for="(tag, index) in userStore.tagsList" :key="tag.path"
-              @click="userStore.setOneActiveTag(tag, index)" class="tags-view-item">
-              {{ tag.title }}
-              <el-icon class="el-icon-close" @click.prevent.stop="userStore.removeOneTag(tag)">
-                <Close />
-              </el-icon>
-            </span>
+            <!-- 面包屑 -->
+            <el-scrollbar>
+              <div class="header-left">
+                <el-icon ref="mySwitch" class="header-item header-switch" v-if="settingStore.isCollapse"
+                  @click="clickCrumb(false)">
+                  <Expand />
+                </el-icon>
+                <el-icon ref="mySwitch" class="header-item header-switch" v-if="!settingStore.isCollapse"
+                  @click="clickCrumb(true)">
+                  <Fold />
+                </el-icon>
+                <el-breadcrumb separator="/" class="header-item">
+                  <el-breadcrumb-item v-for="(item, index) in getBreadcrumb(router.currentRoute)" :key="index"><span
+                      class="header-nav-title">{{ item }}</span></el-breadcrumb-item>
+
+                </el-breadcrumb>
+              </div>
+            </el-scrollbar>
           </div>
-          <!-- 右 -->
           <div>
+            <!-- 个人设置 -->
+            <el-dropdown placement="bottom-end">
+              <span class="el-dropdown__box">
+                <el-avatar :src="avatar" />
+                <el-icon>
+                  <CaretBottom />
+                </el-icon>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item :icon="User" v-on:click="handleCommand('profile', '基本资料')">基本资料</el-dropdown-item>
+                  <el-dropdown-item :icon="Crop" v-on:click="handleCommand('avatar', '更换头像')">更换头像</el-dropdown-item>
+                  <el-dropdown-item :icon="EditPen" v-on:click="handleCommand('password', '重置密码')">重置密码</el-dropdown-item>
+                  <el-dropdown-item :icon="SwitchButton"
+                    v-on:click="handleCommand('logout', '退出登录')">退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+        </div>
+      </el-header>
+      <el-header class="el-header-two">
+        <div class="tags">
+          <!-- 窗口列表 -->
+          <el-scrollbar>
+            <div class="tags-left">
+              <span :class="{ 'active': tag.active, 'tags-item': true }" v-for="(tag, index) in userStore.tagsList"
+                :key="tag.path" @click="userStore.setOneActiveTag(tag, index)" class="tags-view-item">
+                {{ tag.title }}
+                <el-icon class="el-icon-close" @click.prevent.stop="userStore.removeOneTag(tag)">
+                  <Close />
+                </el-icon>
+              </span>
+            </div>
+          </el-scrollbar>
+          <!-- 关闭按钮 -->
+          <div style="margin-left: 5px;margin-top: 3px;">
             <el-dropdown @command="handleNavCommand">
               <el-button type="primary" plain><el-icon class="el-icon--right"><arrow-down /></el-icon></el-button>
               <template #dropdown>
@@ -179,9 +225,9 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
             </el-dropdown>
           </div>
         </div>
-        <el-scrollbar style="height: calc(100% - 40px);">
-          <router-view></router-view>
-        </el-scrollbar>
+      </el-header>
+      <el-main style="border: 1px solid #f0f0f0;  margin: 5px;  padding: 10px;box-sizing:border-box;">
+        <router-view></router-view>
       </el-main>
       <el-footer>BCVP PRO ©2023 Create By 繁星 & Power By Vue3 & BCVP develop together</el-footer>
     </el-container>
@@ -209,9 +255,13 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
   .el-aside {
     background-color: #2f3e52;
 
-    &__logo {
+    .left-logo {
       height: 70px;
-      background: url('@/assets/img/default2.png') no-repeat center / 120px auto;
+      // background: url('@/assets/img/default2.png') no-repeat center / 120px auto;
+
+      line-height: 70px;
+      text-align: center;
+      color: #666;
     }
 
     .el-menu {
@@ -219,28 +269,17 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
     }
   }
 
-  .el-header {
+  .el-header-one {
     background-color: #2f3e52;
     border-left: 1px #606266 solid;
-
-    display: flex;
     align-items: center;
     justify-content: space-between;
+  }
 
-    .el-dropdown__box {
-      display: flex;
-      align-items: center;
-
-      .el-icon {
-        color: #999;
-        margin-left: 10px;
-      }
-
-      &:active,
-      &:focus {
-        outline: none;
-      }
-    }
+  .el-header-two {
+    padding: 0px;
+    margin: 0px;
+    height: 40px;
   }
 
   .el-footer {
@@ -251,23 +290,34 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
     color: #666;
   }
 
-  .header-left {
-    .collapse {
-      cursor: pointer;
-      color: #fff;
-      font-size: 25px;
-      margin-top: 10px;
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
+
+    .header-left {
+      display: flex;
+
+      .header-switch {
+        color: #fff;
+        font-size: 25px;
+        margin-top: 8px;
+        margin-right: 5px;
+        cursor: pointer;
+      }
+
+      .header-item {
+
+        line-height: 40px;
+
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+      }
     }
 
-    .header-nav-box {
-      margin-top: 15px;
-      margin-left: 10px;
-    }
-
-    .header-nav-title {
-      color: #606266;
-      font-size: 14px;
-    }
   }
 }
 
@@ -315,5 +365,46 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
   background-color: #ef2b74;
   color: #fff;
   border-radius: 20px;
+}
+
+.tags {
+  .tags-left {
+    display: flex;
+
+    .tags-item {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+
+.diy-element {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  /* 其他样式 */
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+}
+
+.overlay-body {
+  position: fixed;
+  z-index: 10000;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 100vh;
 }
 </style>

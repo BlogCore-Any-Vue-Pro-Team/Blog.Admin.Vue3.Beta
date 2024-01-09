@@ -89,11 +89,10 @@ const delArticle = () => {
 }
 const searchData = () => {
   ElMessage.success('搜索数据')
-  console.info("formData.type",formData.value.type)
+  console.info("formData.type", formData.value.type)
 }
 </script>
 <template>
-  <page-container>
     <el-row>
       <el-col :span="1.5">
         <el-form :inline="true" :model="formData">
@@ -160,7 +159,6 @@ const searchData = () => {
       </template>
     </el-table>
     <el-pagination style="margin-top: 10px;" small background layout="total, prev, pager, next" :total="50" />
-  </page-container>
   <article-channel-dialog ref="dialog" @success="searchData"></article-channel-dialog>
 </template> 
-<style lang="scss"></style>
+<style lang="scss" scoped></style>
