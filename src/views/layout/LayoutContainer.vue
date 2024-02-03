@@ -14,11 +14,13 @@ import {
   Close,
   ArrowDown
 } from '@element-plus/icons-vue'
+import { ElMessageBox } from 'element-plus'
 import avatar from '@/assets/img/default.png'
 import { useUserStore, useSettingStore } from '@/stores'
 import { onMounted, ref } from 'vue'
 import router from '@/router'
 import MenuItemContainer from '@/views/layout/components/MenuItemContainer.vue'
+
 
 const userStore = useUserStore()
 const settingStore = useSettingStore()
@@ -76,7 +78,7 @@ const handleCommand = async (key, name) => {
   } else {
     // 跳转操作
     userStore.setOneActiveTag({
-      path: `/user/${key}`,
+      path: `/test/${key}`,
       title: name
     })
   }
@@ -128,31 +130,35 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
 </script>
 
 <template>
-  <el-container class="layout-container">
+  <el-container class="layout-container" style="height: 100%;">
     <el-aside v-if="!isMobile" ref="myLeft" :width="settingStore.isCollapse ? '65px' : '200px'">
       <!-- 左侧菜单 -->
-      <div class="left-logo" v-show="!settingStore.isCollapse">繁星</div>
-      <el-scrollbar :style="{ height: (settingStore.isCollapse ? 'calc(100vh)' : 'calc(100vh - 70px)') }">
-        <el-menu :collapse-transition="false" active-text-color="#ffd04b" background-color="#2f3e52"
-          :default-active="$route.path" text-color="#fff" router :collapse="settingStore.isCollapse">
-          <MenuItemContainer :data="userStore.menu"></MenuItemContainer>
-        </el-menu>
-      </el-scrollbar>
+      <div class="left-logo" v-show="!settingStore.isCollapse">{{ userStore.userInfo.RealName }}</div>
+      <!-- <el-scrollbar :style="{ height: (settingStore.isCollapse ? 'calc(100vh)' : 'calc(100vh - 70px)') }"> -->
+      <el-menu :collapse-transition="false" active-text-color="#ffd04b" background-color="#2f3e52"
+        :default-active="$route.path" text-color="#fff" router :collapse="settingStore.isCollapse">
+        <MenuItemContainer :data="userStore.menu"></MenuItemContainer>
+      </el-menu>
+      <!-- </el-scrollbar> -->
     </el-aside>
-    <div v-if="isMobile && showDiyElement">
+    <el-aside v-if="isMobile && showDiyElement" class="overlay-aside">
       <!-- 左侧菜单(手机) -->
+
+      <!-- 遮罩层 -->
+      <div class="diy-element">
+        <div v-if="showDiyElement" class="overlay" @click="hideDiyElement"></div>
+      </div>
       <el-scrollbar class="overlay-body">
-        <el-menu :collapse-transition="false" active-text-color="#ffd04b" background-color="#2f3e52"
-          :default-active="$route.path" text-color="#fff" router :collapse="settingStore.isCollapse">
+        <el-menu style="padding-bottom: 60px;" :collapse-transition="false" active-text-color="#ffd04b"
+          background-color="#2f3e52" :default-active="$route.path" text-color="#fff" router
+          :collapse="settingStore.isCollapse">
           <MenuItemContainer :data="userStore.menu"></MenuItemContainer>
         </el-menu>
       </el-scrollbar>
-      <!-- 遮罩层 -->
-      <div v-if="showDiyElement" class="diy-element">
-        <div class="overlay" @click="hideDiyElement"></div>
-      </div>
-    </div>
-    <el-container>
+
+
+    </el-aside>
+    <el-container style="height: 100%;">
       <!-- 顶部 -->
       <el-header class="el-header-one">
         <div class="header-top">
@@ -171,7 +177,6 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
                 <el-breadcrumb separator="/" class="header-item">
                   <el-breadcrumb-item v-for="(item, index) in getBreadcrumb(router.currentRoute)" :key="index"><span
                       class="header-nav-title">{{ item }}</span></el-breadcrumb-item>
-
                 </el-breadcrumb>
               </div>
             </el-scrollbar>
@@ -180,7 +185,7 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
             <!-- 个人设置 -->
             <el-dropdown placement="bottom-end">
               <span class="el-dropdown__box">
-                <el-avatar :src="avatar" />
+                <el-avatar :src="userStore.userInfo.logo||avatar" />
                 <el-icon>
                   <CaretBottom />
                 </el-icon>
@@ -201,7 +206,7 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
       <el-header class="el-header-two">
         <div class="tags">
           <!-- 窗口列表 -->
-          <el-scrollbar>
+          <el-scrollbar style="padding-bottom: 5px;">
             <div class="tags-left">
               <span :class="{ 'active': tag.active, 'tags-item': true }" v-for="(tag, index) in userStore.tagsList"
                 :key="tag.path" @click="userStore.setOneActiveTag(tag, index)" class="tags-view-item">
@@ -226,38 +231,40 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
           </div>
         </div>
       </el-header>
-      <el-main style="border: 1px solid #f0f0f0;  margin: 5px;  padding: 10px;box-sizing:border-box;">
+      <!-- 内容 -->
+      <el-main style="padding: 10px;margin: 5px;border: 1px solid #f0f0f0; ">
+        <!-- <el-scrollbar> -->
         <router-view></router-view>
+        <!-- </el-scrollbar> -->
       </el-main>
-      <el-footer>BCVP PRO ©2023 Create By 繁星 & Power By Vue3 & BCVP develop together</el-footer>
+      <el-footer>©2023 Create 繁星 & Power Vue3</el-footer>
     </el-container>
   </el-container>
 </template>
-<style>
-.fa {
-  vertical-align: baseline;
-  margin-right: 10px;
-}
-
-.el-menu--collapse i {
-  font-size: 20px !important;
-}
-
-.el-menu--collapse span,
-.el-menu--collapse .el-sub-menu__icon-arrow {
-  display: none !important;
-}
-</style>
 <style lang="scss" scoped>
+// .fa {
+//   vertical-align: baseline;
+//   margin-right: 10px;
+// }
+
+// .el-menu--collapse i {
+//   font-size: 20px !important;
+// }
+
+// .el-menu--collapse span,
+// .el-menu--collapse .el-sub-menu__icon-arrow {
+//   display: none !important;
+// }
+
+
 .layout-container {
-  height: 100vh;
 
   .el-aside {
     background-color: #2f3e52;
 
     .left-logo {
       height: 70px;
-      // background: url('@/assets/img/default2.png') no-repeat center / 120px auto;
+      // background: url('@/assets/img/default.png') no-repeat center / 120px auto;
 
       line-height: 70px;
       text-align: center;
@@ -382,11 +389,7 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
 
 .diy-element {
   position: fixed;
-  top: 0;
-  left: 0;
-  transform: translate(-50%, -50%);
   z-index: 9999;
-  /* 其他样式 */
 }
 
 .overlay {
@@ -399,12 +402,19 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
   z-index: 9999;
 }
 
-.overlay-body {
+.overlay-aside {
   position: fixed;
-  z-index: 10000;
+  z-index: 9999;
   top: 0;
   left: 0;
   width: 200px;
+}
+
+.overlay-body {
+  position: fixed;
+  width: 200px;
+  z-index: 99999;
   height: 100vh;
+  background-color: #2f3e52;
 }
 </style>

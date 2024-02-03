@@ -11,7 +11,7 @@ import {
   GetWeChatMediaList,
   updateWeChatAccountFocus
 } from '@/api/wechat.js'
-
+import { ElMessageBox, ElMessage } from 'element-plus'
 
 // 表格初始化
 const tableData = ref([])
@@ -170,8 +170,8 @@ const HandleSearch = (page) => {
 
   if (page) filters.value.page = page
 
-  HandleClearTable()
-
+  HandleClearTable()   
+  
   getWeChatAccount(filters.value).then(res => {
     tableData.value = res.data.response.data;
     tableTotal.value = res.data.response.dataCount;
@@ -224,7 +224,7 @@ const HandleEditFocus = (row) => {
   visibleFocus.value = true
 }
 const HandleSubmitFocus = () => {
-  refForm.value.validate((valid, fields) => {
+  refFocus.value.validate((valid, fields) => {
     if (!valid && fields) {
       for (let key in fields)
         ElMessage.error(fields[key][0].message)
@@ -308,9 +308,9 @@ const HandleSubmitMedia = (row) => {
   <!-- 搜索 -->
   <el-row>
     <el-col>
-      <el-form :inline="true" :model="filters" class="flexBox">
+      <el-form @submit.prevent :inline="true" :model="filters" class="flexBox">
         <el-form-item label="关键词" class="flexItem" label-width="90">
-          <el-input class="flexContent" v-model="filters.key" placeholder="请输入搜索关键词" clearable />
+          <el-input class="flexContent" v-model.trim="filters.key" placeholder="请输入搜索关键词" clearable />
         </el-form-item>
         <el-form-item class="flexItem">
           <el-button type="primary" plain @click="HandleSearch(1)">查询</el-button>
@@ -357,7 +357,7 @@ const HandleSubmitMedia = (row) => {
     <el-table-column prop="tokenExpiration" label="token过期时间" width="180"></el-table-column>
     <el-table-column prop="Enabled" label="状态" width="" sortable>
       <template #default="{ row }">
-        <el-tag :type="row.Enabled ? 'success' : 'danger'" disable-transitions>{{ row.Enabled ? "正常" : "禁用"
+        <el-tag :type="row.Enabled ? 'success' : 'danger'" disable-transitions>{{ row.Enabled ? "激活" : "禁用"
         }}
         </el-tag>
       </template>
@@ -379,7 +379,7 @@ const HandleSubmitMedia = (row) => {
   </el-row>
   <!-- 弹窗 -->
   <el-dialog v-model="dialogVisible" :title="!isAdd ? '编辑' : '添加'" width="550px" :before-close="handleClose">
-    <el-form ref="refFocus" :model="formData" :rules="ruleForm" label-width="150px" status-icon>
+    <el-form @submit.prevent ref="refForm" :model="formData" :rules="ruleForm" label-width="150px" status-icon label-position="top">
 
       <el-form-item label="微信公众号ID" prop="publicAccount">
         <el-input v-model="formData.publicAccount" auto-complete="off" :disabled="!isAdd"></el-input>
@@ -428,13 +428,12 @@ const HandleSubmitMedia = (row) => {
 
   <!-- 编辑关注 -->
   <el-dialog v-model="visibleFocus" title="编辑关注" width="550px" :before-close="handleClose">
-    <el-form ref="refForm" :model="formData" :rules="ruleFocus" label-width="150px" status-icon>
-
+    <el-form @submit.prevent ref="refFocus" :model="formData" :rules="ruleFocus" label-width="150px" status-icon label-position="top">
       <el-form-item label="微信公众号ID" prop="publicAccount">
         <el-input v-model="formData.publicAccount" auto-complete="off" :disabled="!isAdd"></el-input>
       </el-form-item>
       <el-form-item label="微信公众号名称" prop="publicNick">
-        <el-input v-model="formData.publicNick" auto-complete="off"></el-input>
+        <el-input v-model="formData.publicNick" auto-complete="off" :disabled="!isAdd"></el-input>
       </el-form-item>
       <el-form-item label="是否关注回复" prop="isFocusReply">
         <el-radio v-model="formData.isFocusReply" :label="true">是</el-radio>

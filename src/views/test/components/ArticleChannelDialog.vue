@@ -68,7 +68,7 @@ const onSelectFile = (uploadFile) => {
 
 
 
-    <el-form ref="refForm" :model="formModel" :rules="ruleForm" label-width="120px" status-icon>
+    <el-form @submit.prevent ref="refForm" :model="formModel" :rules="ruleForm" label-width="120px" status-icon label-position="top">
       <el-form-item label="账号" prop="name">
         <el-input v-model="formModel.name" />
       </el-form-item>

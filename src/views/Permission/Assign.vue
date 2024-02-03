@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import {
   getRoleListPage,
 } from '@/api/role.js'
@@ -108,7 +109,7 @@ const reverse = (ls) => {
       <template #header>
         <div class="card-header">
           <span>角色</span>
-          <el-button @click="GetRoles" style="float: right; padding: 3px 0" type="text">刷新</el-button>
+          <el-link @click="GetRoles" style="float: right; padding: 3px 0" type="primary">刷新</el-link>
         </div>
       </template>
       <div style="font-size: 14px; line-height: 32px; cursor: pointer;" v-for="o in roles" :key="o.Id"
@@ -121,8 +122,8 @@ const reverse = (ls) => {
       <template #header>
         <div class="card-header">
           <span>菜单</span>
-          <el-button v-if="isLoad" @click="SaveAssign" style="float: right; padding: 3px 0" type="text">保存</el-button>
-          <el-button v-else type="text">请选中一个要操作的角色</el-button>
+          <el-link v-if="isLoad" @click="SaveAssign" style="float: right; padding: 3px 0" type="primary">保存</el-link>
+          <el-link v-else type="primary">请选中一个要操作的角色</el-link>
         </div>
       </template>
       <div>
@@ -134,7 +135,7 @@ const reverse = (ls) => {
                 <div style="display: flex; justify-content: space-between; /* 左右分布 */">
                   <span style=" margin-right: 10px; ">{{ node.label }}<el-button @click.prevent="reverse(data.btns)"
                       v-if="(data.btns && data.btns.length > 1)" style="padding:5px 8px;margin-left:5px;" size="small"
-                      type="plain">反选</el-button>
+                      plain type="primary">反选</el-button>
                   </span>
                   <el-checkbox-group style=" margin-right: 10px;" v-model="assignBtns">
                     <el-checkbox style="padding: 0px; margin-right: 5px;" v-for="btn in data.btns" :key="btn.value"

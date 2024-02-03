@@ -6,11 +6,12 @@ import {
   , getWeChatCompany
 } from '@/api/wechat.js'
 
-
+import { ElMessageBox } from 'element-plus'
 
 const wechats = ref([])
 const selectWeChat = ref(null)
 const selectCompany = ref(null)
+const selectSubJobID = ref(null)
 const tableData = ref([])
 const tableTotal = ref(0)
 const filters = ref({ page: 1, size: 10, key: '' })
@@ -57,6 +58,9 @@ const HandleSearch = (val) => {
   if (selectCompany.value) {
     filters.value.conditions += " & CompanyID = " + selectCompany.value
   }
+  if (selectSubJobID.value) {
+    filters.value.conditions += " & SubJobID = " + selectSubJobID.value
+  }
   getWeChatBindUser(filters.value)
     .then(res => {
       tableData.value = res.data.response.data;
@@ -99,7 +103,7 @@ watch(() => filters.value.size, () => {
   <!-- 搜索 -->
   <el-row>
     <el-col>
-      <el-form :inline="true" class="flexBox">
+      <el-form @submit.prevent :inline="true" class="flexBox">
         <el-form-item class="flexItem">
           <el-select @change="HandleSearch(1)" v-model="selectWeChat" placeholder="请选择要操作的公众号" style="width: 350px;">
             <el-option class="flexItem" v-for="item in wechats" :key="item.publicAccount" :label="item.publicNick"
@@ -109,12 +113,15 @@ watch(() => filters.value.size, () => {
           </el-select>
         </el-form-item>
         <el-form-item class="flexItem">
-          <el-select v-model="selectCompany" placeholder="请选择要操作的客户">
+          <el-select v-model="selectCompany" placeholder="请选择要操作的客户" style="width: 180px;">
             <el-option v-for="item in companys" :key="item.CompanyID" :label="item.CompanyName" :value="item.CompanyID">
               <span style="float: left">{{ item.CompanyName }}</span>
               <span style="float: right; color: #8492a6; font-size: 13px">{{ item.CompanyID }}</span>
             </el-option>
           </el-select>
+        </el-form-item>
+        <el-form-item class="flexItem">
+          <el-input v-model.trim="selectSubJobID" placeholder="员工ID"></el-input>
         </el-form-item>
         <el-form-item class="flexItem">
           <el-button type="primary" plain @click="HandleSearch(1)">刷新数据</el-button>
@@ -133,7 +140,12 @@ watch(() => filters.value.size, () => {
     <el-table-column prop="SubJobID" label="员工ID" width="200" show-overflow-tooltip></el-table-column>
     <el-table-column prop="SubUserRegTime" label="注册时间" width="180" show-overflow-tooltip></el-table-column>
     <el-table-column prop="SubUserRefTime" label="更新时间" width="180" show-overflow-tooltip> </el-table-column>
-    <el-table-column prop="IsUnBind" label="是否解绑" width="180" show-overflow-tooltip> </el-table-column>
+    <el-table-column prop="IsUnBind" label="是否解绑" width="180" show-overflow-tooltip>
+      <template #default="{ row }">
+        <el-tag v-if="row.IsUnBind" type="danger">已解绑</el-tag>
+        <el-tag v-else type="success">已绑定</el-tag>
+      </template>
+    </el-table-column>
     <template #empty>
       <el-empty description="没有数据"></el-empty>
     </template>

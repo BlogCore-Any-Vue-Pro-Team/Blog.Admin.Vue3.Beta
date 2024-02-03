@@ -10,8 +10,6 @@ import { useUserStore } from '@/stores/modules/user'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-
-
     {
       path: '/',
       component: () => import('@/views/layout/LayoutContainer.vue'),
@@ -19,33 +17,54 @@ const router = createRouter({
       children: [
         {
           path: '/',
-          component: () => import('@/views/front/frontPage.vue')
+          component: () => import('@/views/front/FrontPage.vue')
         }
       ]
     },
     {
       path: '/login',
+      isCheckToken: false,
       component: () => import('@/views/login/LoginPage.vue')
     },
     {
-      path: '/article',
+      path: '/test/test',
+      isCheckToken: false,
+      component: () => import('@/views/test/test.vue')
+    },
+    {
+      path: '/test',
+      isCheckToken: false,
       component: () => import('@/views/layout/LayoutContainer.vue'),
-      redirect: '/article/manage',
+      redirect: '/test/test',
       children: [
         {
-          path: '/User/profile',
+          path: '/test/profile',
+          isCheckToken: false,
           component: () => import('@/views/user/UserProfile.vue')
         },
         {
-          path: '/User/avatar',
+          path: '/test/avatar',
+          isCheckToken: false,
           component: () => import('@/views/user/UserAvatar.vue')
         },
         {
-          path: '/User/password',
+          path: '/test/password',
+          isCheckToken: false,
           component: () => import('@/views/user/UserPassword.vue')
         }
       ]
-    }
+    },
+    {
+      path: '/404',
+      isCheckToken: false,
+      component: () => import('@/views/error/404.vue')
+    },
+    // 空白路由重定向到404页面
+    {
+      path: '/:catchAll(.*)',
+      isCheckToken: false,
+      component: () => import('@/views/error/404.vue')
+    },
   ]
 })
 
@@ -55,9 +74,11 @@ const router = createRouter({
 router.beforeEach((to, from) => {
   // 如果没有token,且访问的是非登录页面,拦截到登录页面
   const userStore = useUserStore()
-  if (!userStore.token && to.path != '/login') {
+  if (to.isCheckToken === false && !userStore.token && to.path != '/login') {
     return '/login'
   }
+  //路由变化事件
+
 })
 
 // vue文件列表

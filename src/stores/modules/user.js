@@ -10,6 +10,7 @@ export const useUserStore = defineStore(
     const token_type = ref('')
     const menu = ref([])
     const uid = ref('')
+    const userInfo = ref({})
 
 
 
@@ -22,36 +23,37 @@ export const useUserStore = defineStore(
     }
     //上页
     const prePage = ref({})
+    // 当前页
     const curPage = ref({})
     // 列表
     const tagsList = ref([firstPage])
 
     // 设置一个激活导航
-    const setOneActiveTag = (newTag) => {
-
-      // console.info("tagsList", tagsList)
+    const setOneActiveTag = (newTag, isReplace) => {
       // console.info("newTag", newTag)
       //点了自己
-      if (newTag.path === curPage.value.path) return;
+      // if (newTag.path === curPage.value.path) return;
 
       let isRealNew = false
       for (let index = 0; index < tagsList.value.length; index++) {
         const element = tagsList.value[index];
+        if (element.active) prePage.value = element
+        element.active = false
+        //已添加过了,无需重复添加
         if (element.path === newTag.path) {
-          //已添加过了,无需重复添加
           isRealNew = true
           newTag = element
         }
-
-        if (element.active) prePage.value = element
-
-        element.active = false
       }
       newTag.active = true;
 
       if (!isRealNew) tagsList.value.push(newTag)
+      if (isReplace) {
+        router.replace(newTag.path)
+      } else {
+        router.push(newTag.path)
+      }
 
-      router.push(newTag.path)
       curPage.value = newTag
 
     }
@@ -114,6 +116,10 @@ export const useUserStore = defineStore(
     const setUid = (newUid) => {
       uid.value = newUid
     }
+    // 设置用户信息
+    const setUserInfo = (info) => {
+      userInfo.value = info
+    }
 
 
     // 退出登录
@@ -153,6 +159,8 @@ export const useUserStore = defineStore(
       tagsList,
       prePage,
       curPage,
+      userInfo,
+      setUserInfo,
       setName,
       setPass,
       setToken,

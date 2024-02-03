@@ -43,3 +43,22 @@ export const batchRemoveUser = params => {
   return request.post('/api/user/deletes', params);
 };
 
+
+// 重置密码(管理员)
+export const ResetPass = params => {
+  return request.put('/api/user/ResetPass', params);
+};
+
+// 重置我的密码(用户)
+export const ResetMyPass = params => {
+  return request.put('/api/user/ResetMyPass', params);
+};
+// 更新我的资料(用户)
+export const PutMyInfo = params => {
+  return request.put('/api/user/PutMyInfo', params);
+};
+// 更新我的资料(用户)
+export const RefreshMyLogo = params => {
+  return request.put('/api/user/RefreshMyLogo', params);
+};
+

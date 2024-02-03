@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import {
   getPermissionTable,
   removePermission,
@@ -84,20 +85,16 @@ const ruleForm = {
   Name: [
     { required: true, message: '菜单名称不能为空', trigger: 'change' },
   ],
-  
+
   Pid: [
     { required: true, message: '父级菜单不能为空', trigger: 'change' },
   ]
 }
 const clkTypeEdit = () => {
-  formData.value.IsButton = false;
-  if (formData.value.MenuType == "页面") {
-    formData.value.Code = "";
-  } else if (formData.value.MenuType == "目录") {
-    formData.value.Code = "-";
-  } else if (formData.value.MenuType == "按钮") {
-    formData.value.Code = " ";
-    formData.value.IsButton = true;
+  formData.value.IsButton = false
+
+  if (formData.value.MenuType == "button") {
+    formData.value.IsButton = true
   }
 }
 //新增
@@ -220,12 +217,12 @@ const HandleSearch = (page) => {
   <!-- 搜索 -->
   <el-row>
     <el-col>
-      <el-form :inline="true" :model="filters" class="flexBox">
-        <el-form-item label="关键词" class="flexItem" label-width="90">
-          <el-input class="flexContent" v-model="filters.key" placeholder="请输入搜索关键词" clearable />
-        </el-form-item>
+      <el-form @submit.prevent :inline="true" :model="filters" class="flexBox">
+        <!-- <el-form-item label="关键词" class="flexItem" label-width="90">
+          <el-input class="flexContent" v-model.trim="filters.key" placeholder="请输入搜索关键词" clearable />
+        </el-form-item> -->
         <el-form-item class="flexItem">
-          <el-button type="primary" plain @click="HandleSearch(1)">查询</el-button>
+          <el-button type="primary" plain @click="HandleSearch(1)">刷新</el-button>
         </el-form-item>
         <el-form-item class="flexItem">
           <el-button type="primary" plain @click="HandleAdd">添加</el-button>
@@ -291,7 +288,8 @@ const HandleSearch = (page) => {
   </el-row>
   <!-- 弹窗 -->
   <el-dialog v-model="dialogVisible" :title="formData.Id ? '编辑' : '添加'" width="550px" :before-close="handleClose">
-    <el-form ref="refForm" :model="formData" :rules="ruleForm" label-width="80px" status-icon>
+    <el-form @submit.prevent ref="refForm" :model="formData" :rules="ruleForm" label-width="80px" status-icon
+      label-position="top">
 
       <el-form-item label="菜单名称" prop="Name">
         <el-input v-model="formData.Name" auto-complete="off"></el-input>
@@ -299,9 +297,10 @@ const HandleSearch = (page) => {
 
       <el-form-item label="菜单类型">
         <el-radio-group @change="clkTypeEdit" v-model="formData.MenuType">
-          <el-radio label="目录"></el-radio>
-          <el-radio label="页面"></el-radio>
-          <el-radio label="按钮"></el-radio>
+          <el-radio label="catalog">目录</el-radio>
+          <el-radio label="page">页面</el-radio>
+          <el-radio label="button">按钮</el-radio>
+          <el-radio label="url">网址</el-radio>
         </el-radio-group>
       </el-form-item>
 
@@ -328,18 +327,18 @@ const HandleSearch = (page) => {
       <el-form-item label="排序" prop="OrderSort">
         <el-input v-model.number="formData.OrderSort" auto-complete="off"></el-input>
       </el-form-item>
-      <el-form-item prop="IsButton" label="是否按钮">
+      <el-form-item prop="IsButton" label="是否按钮" v-if="false">
         <el-switch v-model="formData.IsButton"></el-switch>
       </el-form-item>
-      <el-form-item label="按钮事件" prop="Func">
+      <el-form-item label="按钮事件" prop="Func" v-if="formData.MenuType == 'button'">
         <el-input v-model="formData.Func" auto-complete="off"></el-input>
       </el-form-item>
-      <el-form-item prop="IsHide" label="隐藏菜单" width>
+      <el-form-item prop="IsHide" label="隐藏菜单">
         <el-switch v-model="formData.IsHide"></el-switch>
       </el-form-item>
 
-      <el-form-item prop="Pid" label="父级菜单" >
-        <el-tree-select v-model="formData.Pid" :data="menuTrees" filterable clearable check-strictly=true />
+      <el-form-item prop="Pid" label="父级菜单">
+        <el-tree-select v-model="formData.Pid" :data="menuTrees" filterable clearable :check-strictly="true" />
       </el-form-item>
       <el-form-item prop="Mid" label="API接口">
         <el-select style="width: 100%" v-model="formData.Mid" placeholder="请选择API" filterable>

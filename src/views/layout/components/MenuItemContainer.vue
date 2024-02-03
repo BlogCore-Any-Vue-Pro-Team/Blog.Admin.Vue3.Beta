@@ -27,7 +27,7 @@ const setActiveTag = (item) => {
       <template #title>
         <i v-if="item.children && item.children.length > 0 && item.iconCls && !item.IsButton" class="fa"
           :class="item.iconCls"></i>
-        <span>{{ item.name }}</span>
+        <span style="margin-left: 5px;">{{ item.name }}</span>
       </template>
       <!-- 多级路由菜单 -->
       <MenuItemContainer :data="item.children"></MenuItemContainer>

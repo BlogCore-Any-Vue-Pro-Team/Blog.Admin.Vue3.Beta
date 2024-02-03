@@ -112,15 +112,15 @@ onMounted(() => {
 })
 
 
-
+import { ElMessageBox, ElMessage } from 'element-plus'
 </script>
 <template>
   <!-- 搜索 -->
   <el-row>
     <el-col>
-      <el-form :inline="true" class="flexBox">
+      <el-form @submit.prevent :inline="true" class="flexBox">
         <el-form-item class="flexItem">
-          <el-select @change="GetTemplate" v-model="selectWeChat" placeholder="请选择要操作的公众号" style="width: 350px;">
+          <el-select v-model="selectWeChat" placeholder="请选择要操作的公众号" style="width: 350px;">
             <el-option class="flexItem" v-for="item in wechats" :key="item.publicAccount" :label="item.publicNick"
               :value="item.publicAccount">
               <span>{{ item.publicNick }}</span>(<span>{{ item.publicAccount }}</span>)
@@ -128,7 +128,7 @@ onMounted(() => {
           </el-select>
         </el-form-item>
         <el-form-item class="flexItem">
-          <el-select v-model="selectOperate" placeholder="请选择要发送的集合">
+          <el-select v-model="selectOperate" placeholder="请选择要发送的集合" style="width: 180px;">
             <el-option v-for="item in operate" :key="item.value" :label="item.label" :value="item.value">
               <span style="float: left">{{ item.label }}</span>
               <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span>
@@ -136,7 +136,7 @@ onMounted(() => {
           </el-select>
         </el-form-item>
         <el-form-item class="flexItem">
-          <el-select v-model="selectBindOrSub" placeholder="请选择要发送的对象">
+          <el-select v-model="selectBindOrSub" placeholder="请选择要发送的对象" style="width: 180px;">
             <el-option v-for="item in bindOrSub" :key="item.value" :label="item.label" :value="item.value">
               <span style="float: left">{{ item.label }}</span>
               <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span>
@@ -144,7 +144,7 @@ onMounted(() => {
           </el-select>
         </el-form-item>
         <el-form-item v-if="selectBindOrSub == 'bind'" class="flexItem">
-          <el-select v-model="selectCompany" placeholder="请选择要操作的客户">
+          <el-select v-model="selectCompany" placeholder="请选择要操作的客户" style="width: 180px;">
             <el-option v-for="item in companys" :key="item.CompanyID" :label="item.CompanyName" :value="item.CompanyID">
               <span style="float: left">{{ item.CompanyName }}</span>
               <span style="float: right; color: #8492a6; font-size: 13px">{{ item.CompanyID }}</span>
@@ -152,7 +152,7 @@ onMounted(() => {
           </el-select>
         </el-form-item>
         <el-form-item class="flexItem">
-          <el-select v-model="selectMsgType" placeholder="请选择消息类型">
+          <el-select v-model="selectMsgType" placeholder="请选择消息类型" style="width: 180px;">
             <el-option v-for="item in msgTypes" :key="item.value" :label="item.label" :value="item.value">
               <span style="float: left">{{ item.label }}</span>
               <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span>

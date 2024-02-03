@@ -18,9 +18,11 @@ const locale = computed(() => (setting.language === 'zh-cn' ? zhCn : en))
 
 <template>
   <!-- 入口 -->
-  <el-config-provider :locale="locale">
-    <router-view></router-view>
-  </el-config-provider>
+  <div style="height: 100%;">
+    <el-config-provider :locale="locale">
+      <router-view></router-view>
+    </el-config-provider>
+  </div>
 </template>
 
-<style scoped></style>
+<style lang="scss" scoped></style>

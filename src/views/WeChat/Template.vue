@@ -7,7 +7,7 @@ import {
   pushCardMsg
 } from '@/api/wechat.js'
 
-
+import { ElMessageBox, ElMessage } from 'element-plus'
 
 const wechats = ref([])
 const selectWeChat = ref(null)
@@ -113,7 +113,7 @@ const HandleSubmit = () => {
       } else {
         formData.value.newMsg = {}
       }
-      
+
       pushCardMsg(formData.value)
         .then(res => {
           ElMessage.success(res.data.msg || '推送成功')
@@ -162,7 +162,7 @@ onMounted(() => {
   <!-- 搜索 -->
   <el-row>
     <el-col>
-      <el-form :inline="true" class="flexBox">
+      <el-form @submit.prevent :inline="true" class="flexBox">
         <el-form-item class="flexItem">
           <el-select @change="GetTemplate" v-model="selectWeChat" placeholder="请选择要操作的公众号" style="width: 350px;">
             <el-option class="flexItem" v-for="item in wechats" :key="item.publicAccount" :label="item.publicNick"
@@ -197,7 +197,7 @@ onMounted(() => {
 
   <!-- 弹窗 -->
   <el-dialog v-model="dialogVisible" title="模拟消息" width="550px" :before-close="handleClose">
-    <el-form ref="refForm" :model="formData" label-width="120px" status-icon>
+    <el-form @submit.prevent ref="refForm" :model="formData" label-width="120px" status-icon label-position="top">
 
       <el-form-item label="公众号" prop="id">
         <el-select v-model="formData.info.id" placeholder="请选择要操作的公众号">

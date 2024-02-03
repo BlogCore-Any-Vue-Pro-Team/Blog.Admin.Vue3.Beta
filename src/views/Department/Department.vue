@@ -2,7 +2,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { getDepartmentTreeTable, removeDepartment, removeBatchDepartment, editDepartment, addDepartment, getDepartmentTree } from '@/api/dep.js'
 
-
+import {  ElMessageBox, ElMessage } from 'element-plus'
 // 表格初始化
 const tableData = ref([])
 const tableTotal = ref(0)
@@ -172,7 +172,7 @@ const HandleSearch = (page) => {
   <!-- 搜索 -->
   <el-row>
     <el-col>
-      <el-form :inline="true" :model="filters" class="flexBox">
+      <el-form @submit.prevent :inline="true" :model="filters" class="flexBox">
         <el-form-item label="关键词" class="flexItem" label-width="90">
           <el-input class="flexContent" v-model="filters.key" placeholder="请输入搜索关键词" clearable />
         </el-form-item>
@@ -228,7 +228,7 @@ const HandleSearch = (page) => {
   </el-row>
   <!-- 弹窗 -->
   <el-dialog v-model="dialogVisible" :title="formData.Id ? '编辑' : '添加'" width="450px" :before-close="handleClose">
-    <el-form ref="refForm" :model="formData" :rules="ruleForm" label-width="80px" status-icon>
+    <el-form @submit.prevent ref="refForm" :model="formData" :rules="ruleForm" label-width="80px" status-icon label-position="top">
 
       <el-form-item label="部门名称" prop="Name">
         <el-input v-model="formData.Name" auto-complete="off"></el-input>

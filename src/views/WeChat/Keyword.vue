@@ -11,7 +11,7 @@ import {
   GetWeChatMediaList
 } from '@/api/wechat.js'
 
-
+import { ElMessageBox, ElMessage } from 'element-plus'
 
 const wechats = ref([])
 const selectWeChat = ref(null)
@@ -26,14 +26,26 @@ const formData = ref({})
 const isAdd = ref(false)
 const refForm = ref()
 const ruleForm = {
-  servername: [
-    { required: true, message: '服务器名称不能为空', trigger: 'change' },
+  key: [
+    { required: true, message: '触发关键词不能为空', trigger: 'change' },
   ],
-  serveraddress: [
-    { required: true, message: '服务器地址不能为空', trigger: 'change' },
+  media_type: [
+    { required: true, message: '关键词类型不能为空', trigger: 'change' },
   ],
-  serverport: [
-    { required: true, message: '服务器端口不能为空', trigger: 'change' },
+  media_desc: [
+    { required: true, message: '关键词回复不能为空', trigger: 'change' },
+  ],
+  title: [
+    { required: true, message: '视频标题不能为空', trigger: 'change' },
+  ],
+  description: [
+    { required: true, message: '视频描述不能为空', trigger: 'change' },
+  ],
+  url: [
+    { required: true, message: '媒体地址不能为空', trigger: 'change' },
+  ],
+  media_id: [
+    { required: true, message: '媒体id不能为空', trigger: 'change' },
   ]
 }
 const HandleSelectChange = (selection) => {
@@ -75,10 +87,8 @@ const HandleSearch = (val) => {
   filters.value.conditions = 'publicAccount = ' + selectWeChat.value;
 
   if (filters.value.key) {
-    filters.conditions = ' & key contains ' + filters.value.key
-  }
-
-  selectWeChat.value
+    filters.value.conditions = filters.value.conditions + ' & key contains ' + filters.value.key
+  } 
 
 
   getWeChatKeyword(filters.value)
@@ -186,7 +196,7 @@ const handleClose = (done) => {
     })
 }
 
- 
+
 const HandleChangeFocus = () => {
   formData.value.title = ''
   formData.value.description = ''
@@ -271,7 +281,7 @@ watch(() => filters.value.size, () => {
   <!-- 搜索 -->
   <el-row>
     <el-col>
-      <el-form :inline="true" class="flexBox">
+      <el-form @submit.prevent :inline="true" class="flexBox">
         <el-form-item class="flexItem">
           <el-select @change="HandleSearch(1)" v-model="selectWeChat" placeholder="请选择要操作的公众号" style="width: 350px;">
             <el-option class="flexItem" v-for="item in wechats" :key="item.publicAccount" :label="item.publicNick"
@@ -281,7 +291,7 @@ watch(() => filters.value.size, () => {
           </el-select>
         </el-form-item>
         <el-form-item class="flexItem">
-          <el-input clearable v-model="filters.key" placeholder="请输入关键词"></el-input>
+          <el-input clearable v-model.trim="filters.key" placeholder="请输入关键词"></el-input>
         </el-form-item>
         <el-form-item class="flexItem">
           <el-button type="primary" plain @click="HandleSearch(1)">查询</el-button>
@@ -329,10 +339,11 @@ watch(() => filters.value.size, () => {
   <!-- 弹窗 -->
   <!-- 编辑关注 -->
   <el-dialog v-model="dialogVisible" title="编辑关注" width="550px" :before-close="handleClose">
-    <el-form ref="refForm" :model="formData" :rules="ruleForm" label-width="150px" status-icon>
+    <el-form @submit.prevent ref="refForm" :model="formData" :rules="ruleForm" label-width="150px" status-icon
+      label-position="top">
 
       <el-form-item label="触发关键词" prop="key">
-        <el-input v-model="formData.key" auto-complete="off" :disabled="!isAdd"></el-input>
+        <el-input v-model="formData.key" auto-complete="off"></el-input>
       </el-form-item>
       <el-form-item label="回复类型" prop="media_type">
         <el-select clearable v-model="formData.media_type" placeholder="请选择" @change="HandleChangeFocus">
@@ -355,8 +366,7 @@ watch(() => filters.value.size, () => {
           </el-col>
         </el-row>
       </el-form-item>
-      <el-form-item v-if="formData.media_type != 'text' && formData.media_type == 'video'"
-        label="视频标题" prop="title">
+      <el-form-item v-if="formData.media_type != 'text' && formData.media_type == 'video'" label="视频标题" prop="title">
         <el-input style="width:calc(100% - 100px);margin-left: 5px;" v-model="formData.title"
           auto-complete="off"></el-input>
       </el-form-item>

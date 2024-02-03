@@ -7,7 +7,7 @@ import {
 } from '@/api/wechat.js'
 
 
-
+import { ElMessageBox, ElMessage } from 'element-plus'
 const wechats = ref([])
 const selectWeChat = ref(null)
 const curItem = ref(null)
@@ -178,7 +178,7 @@ onMounted(() => {
   <!-- 搜索 -->
   <el-row>
     <el-col>
-      <el-form :inline="true" class="flexBox">
+      <el-form @submit.prevent :inline="true" class="flexBox">
         <el-form-item class="flexItem">
           <el-select @change="GetWxMenu" v-model="selectWeChat" placeholder="请选择要操作的公众号" style="width: 350px;">
             <el-option class="flexItem" v-for="item in wechats" :key="item.publicAccount" :label="item.publicNick"
@@ -229,7 +229,7 @@ onMounted(() => {
         </div>
       </template>
 
-      <el-form v-if="curItem" :model="curItem" label-width="120px">
+      <el-form @submit.prevent v-if="curItem" :model="curItem" label-width="120px">
         <el-form-item label="菜单名称">
           <el-input v-model="curItem.name" />
         </el-form-item>

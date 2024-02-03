@@ -3,16 +3,19 @@ import { useUserStore } from '@/stores'
 import router from '@/router'
 const baseURL = ''
 
+import { ElLoading, ElMessageBox, ElMessage } from 'element-plus'
 const instance = axios.create({
   // 基地址
   baseURL,
   timeout: 30000
 })
+var loadingCount = 0
 var loadingInstance = null
 // 请求拦截
 instance.interceptors.request.use(
   (config) => {
     if (config.ext === undefined || config.ext.loading === undefined || config.ext.loading === true) {
+      loadingCount++;
       loadingInstance = ElLoading.service({
         lock: true,
         text: '系统正在加载数据中...',
@@ -32,7 +35,12 @@ instance.interceptors.request.use(
 // 响应拦截
 instance.interceptors.response.use(
   (res) => {
-    if (loadingInstance) loadingInstance.close();
+    if (loadingCount > 0) {
+      loadingCount--;
+      if (loadingCount <= 0) {
+        loadingInstance.close();
+      }
+    }
     // 业务拦截
     if (res.data.success) {
       return res
@@ -42,7 +50,12 @@ instance.interceptors.response.use(
     return Promise.reject(res.data)
   },
   (err) => {
-    if (loadingInstance) loadingInstance.close();
+    if (loadingCount > 0) {
+      loadingCount--;
+      if (loadingCount <= 0) {
+        loadingInstance.close();
+      }
+    }
     // 响应出错
     // 处理401错误
     if (err.response?.status === 401) {

@@ -95,7 +95,7 @@ const searchData = () => {
 <template>
     <el-row>
       <el-col :span="1.5">
-        <el-form :inline="true" :model="formData">
+        <el-form @submit.prevent :inline="true" :model="formData">
           <el-form-item label="关键词">
             <el-input style="width: 200px;" v-model="formData.key" placeholder="请输入搜索关键词" clearable />
           </el-form-item>

@@ -7,7 +7,7 @@ import {
 } from '@/api/wechat.js'
 
 
-
+import { ElMessageBox } from 'element-plus'
 const wechats = ref([])
 const selectWeChat = ref(null)
 const selectCompany = ref(null)
@@ -105,7 +105,7 @@ watch(() => filters.value.size, () => {
   <!-- 搜索 -->
   <el-row>
     <el-col>
-      <el-form :inline="true" class="flexBox">
+      <el-form @submit.prevent :inline="true" class="flexBox">
         <el-form-item class="flexItem">
           <el-select @change="HandleSearch(1)" v-model="selectWeChat" placeholder="请选择要操作的公众号" style="width: 350px;">
             <el-option class="flexItem" v-for="item in wechats" :key="item.publicAccount" :label="item.publicNick"
@@ -115,7 +115,7 @@ watch(() => filters.value.size, () => {
           </el-select>
         </el-form-item>
         <el-form-item class="flexItem">
-          <el-select v-model="selectCompany" placeholder="请选择要操作的客户">
+          <el-select v-model="selectCompany" placeholder="请选择要操作的客户" style="width: 180px;">
             <el-option v-for="item in companys" :key="item.CompanyID" :label="item.CompanyName" :value="item.CompanyID">
               <span style="float: left">{{ item.CompanyName }}</span>
               <span style="float: right; color: #8492a6; font-size: 13px">{{ item.CompanyID }}</span>
