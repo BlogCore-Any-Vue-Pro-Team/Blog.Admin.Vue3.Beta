@@ -11,59 +11,61 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: '/_self',
       component: () => import('@/views/layout/LayoutContainer.vue'),
       redirect: '/',
+      meta: { requireAuth: true },
       children: [
         {
           path: '/',
-          component: () => import('@/views/front/FrontPage.vue')
+          component: () => import('@/views/front/FrontPage.vue'),
+          meta: { requireAuth: false, title: '首页' }
         }
       ]
     },
     {
       path: '/login',
-      isCheckToken: false,
-      component: () => import('@/views/login/LoginPage.vue')
+      component: () => import('@/views/login/LoginPage.vue'),
+      meta: { requireAuth: false, title: '登录' }
     },
     {
       path: '/test/test',
-      isCheckToken: false,
-      component: () => import('@/views/test/test.vue')
+      component: () => import('@/views/test/test.vue'),
+      meta: { requireAuth: false, title: '测试页面' }
     },
     {
       path: '/test',
-      isCheckToken: false,
       component: () => import('@/views/layout/LayoutContainer.vue'),
       redirect: '/test/test',
+      meta: { requireAuth: false },
       children: [
         {
           path: '/test/profile',
-          isCheckToken: false,
-          component: () => import('@/views/user/UserProfile.vue')
+          component: () => import('@/views/user/UserProfile.vue'),
+          meta: { requireAuth: true, title: '基本资料' }
         },
         {
           path: '/test/avatar',
-          isCheckToken: false,
-          component: () => import('@/views/user/UserAvatar.vue')
+          component: () => import('@/views/user/UserAvatar.vue'),
+          meta: { requireAuth: true, title: '更换头像' }
         },
         {
           path: '/test/password',
-          isCheckToken: false,
-          component: () => import('@/views/user/UserPassword.vue')
+          component: () => import('@/views/user/UserPassword.vue'),
+          meta: { requireAuth: true, title: '重置密码' }
         }
       ]
     },
     {
       path: '/404',
-      isCheckToken: false,
-      component: () => import('@/views/error/404.vue')
+      component: () => import('@/views/error/404.vue'),
+      meta: { requireAuth: false, title: '404错误' }
     },
     // 空白路由重定向到404页面
     {
       path: '/:catchAll(.*)',
-      isCheckToken: false,
-      component: () => import('@/views/error/404.vue')
+      component: () => import('@/views/error/404.vue'),
+      meta: { requireAuth: false, title: '404错误' },
     },
   ]
 })
@@ -73,11 +75,15 @@ const router = createRouter({
 // 返回false 拦回from的地址页面
 router.beforeEach((to, from) => {
   // 如果没有token,且访问的是非登录页面,拦截到登录页面
+  if (to.meta.title) document.title = '后台管理' + "-" + to.meta.title
   const userStore = useUserStore()
-  if (to.isCheckToken === false && !userStore.token && to.path != '/login') {
+  if (to.meta.requireAuth === true && !userStore.token && to.path != '/login') {
     return '/login'
   }
-  //路由变化事件
+  //路由变化事件  
+
+  if (to.path != '/login' && to.path != '/test/test' && to.path != '/404')
+    userStore.setOneActiveTag(to.path, from.path)
 
 })
 
@@ -92,15 +98,16 @@ export const vueFilePathList = {
 
 // 动态添加路由
 export const addRoute = (item, parent) => {
-
   let meta = { ...item.meta, ...{ parent } }
   router.addRoute({
-    path: item.path,
+    path: item.path + "_self",
+    name: item.id + "_self",
     component: () => import('@/views/layout/LayoutContainer.vue'),
     redirect: item.path,
     children: [
       {
         path: item.path,
+        name: item.id,
         component: vueFilePathList['/src/views' + item.path + '.vue'],
         meta: meta
       }

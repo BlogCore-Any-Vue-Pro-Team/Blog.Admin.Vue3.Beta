@@ -7,7 +7,7 @@ export const userLogin = (params) => {
 
 // 获取用户信息
 export const getInfoByToken = (params) => {
-  return request.get('/api/user/getInfoByToken', { params: params })
+  return request.get('/api/user/getInfoByToken_v3', { params: params })
 }
 
 // 获取用户菜单
@@ -24,7 +24,7 @@ export const GetServerInfo = (params) => {
 
 // 获取用户列表
 export const getUserListPage = params => {
-  return request.get('/api/user/get', { params: params });
+  return request.get('/api/user/get_v3', { params: params });
 };
 // 删除用户
 export const removeUser = params => {
@@ -32,11 +32,11 @@ export const removeUser = params => {
 };
 // 编辑用户
 export const editUser = params => {
-  return request.put('/api/user/put', params);
+  return request.put('/api/user/put_v3', params);
 };
 // 添加用户
 export const addUser = params => {
-  return request.post('/api/user/post', params);
+  return request.post('/api/user/post_v3', params);
 };
 // 批量删除用户
 export const batchRemoveUser = params => {

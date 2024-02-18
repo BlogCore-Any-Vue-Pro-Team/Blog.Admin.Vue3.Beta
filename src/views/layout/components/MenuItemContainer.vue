@@ -3,7 +3,7 @@ import MenuItemContainer from './MenuItemContainer.vue'
 import { useUserStore } from '@/stores'
 
 const userStore = useUserStore()
-
+import router from '@/router'
 
 // 传参
 defineProps({
@@ -14,10 +14,8 @@ defineProps({
 })
 
 const setActiveTag = (item) => {
-  userStore.setOneActiveTag({
-    path: item.path,
-    title: item.name
-  })
+  router.push(item.path)
+  // userStore.setOneActiveTag(item.path)
 }
 
 </script>

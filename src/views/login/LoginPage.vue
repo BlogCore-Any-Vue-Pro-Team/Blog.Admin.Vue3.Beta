@@ -68,14 +68,14 @@ const login = () => {
 
             // 获取菜单
             GetNavigationBar({ uid: userStore.uid }).then((menuInfo) => {
-              userStore.setMenu( menuInfo.data.response.children)
+              userStore.setMenu(menuInfo.data.response.children)
 
               // 添加vue router路由
               addDynamicRoutes(userStore.menu)
               if (userStore.curPage.path && userStore.curPage.path != '/login') {
                 console.info("跳转:", userStore.curPage.path)
                 router.replace(userStore.curPage.path)
-                userStore.setOneActiveTag({ path: userStore.curPage.path }, true)
+                // userStore.setOneActiveTag(userStore.curPage.path)
               } else {
                 // 跳转路由
                 console.info("跳转:", "/")
@@ -90,9 +90,7 @@ const login = () => {
         .catch((errUser) => {
 
           // 在这里处理登录失败的额外操作
-          console.info('登录失败', errUser)
-
-          // ElMessage.error('登录失败');
+          console.info('登录失败', errUser) 
         })
     })
     .catch((err) => {

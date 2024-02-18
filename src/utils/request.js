@@ -64,7 +64,10 @@ instance.interceptors.response.use(
     }
     // 错误默认情况
     console.info('异常错误', err)
-    ElMessage.error(err.response.data.msg || '服务异常')
+    if (err.response && err.response.data)
+      ElMessage.error(err.response.data.msg)
+    else
+      ElMessage.error('服务异常')
     return Promise.reject(err)
   }
 )

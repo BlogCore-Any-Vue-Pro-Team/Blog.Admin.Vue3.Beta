@@ -29,55 +29,57 @@ export const useUserStore = defineStore(
     const tagsList = ref([firstPage])
 
     // 设置一个激活导航
-    const setOneActiveTag = (newTag, isReplace) => {
+    const setOneActiveTag = (path, prePath) => {
       // console.info("newTag", newTag)
       //点了自己
       // if (newTag.path === curPage.value.path) return;
-
-      let isRealNew = false
-      for (let index = 0; index < tagsList.value.length; index++) {
-        const element = tagsList.value[index];
-        if (element.active) prePage.value = element
-        element.active = false
-        //已添加过了,无需重复添加
-        if (element.path === newTag.path) {
-          isRealNew = true
-          newTag = element
+      let allRoutes = router.getRoutes()
+      let findRoute = allRoutes.find(t => t.path === path)
+      let findTag = tagsList.value.find(t => t.path === path)
+      tagsList.value.forEach(t => {
+        t.active = false
+      })
+      if (findRoute) {
+        if (findTag) {
+          findTag.title = findRoute.meta.title
+        } else {
+          findTag = {}
+          findTag.title = findRoute.meta.title
+          findTag.path = findRoute.path
+          tagsList.value.push(findTag)
         }
+        findTag.active = true
+        curPage.value = findTag
       }
-      newTag.active = true;
-
-      if (!isRealNew) tagsList.value.push(newTag)
-      if (isReplace) {
-        router.replace(newTag.path)
-      } else {
-        router.push(newTag.path)
+      if (prePath) {
+        let findPreRoute = allRoutes.find(t => t.path === prePath)
+        if (findPreRoute) prePage.value = findPreRoute
       }
-
-      curPage.value = newTag
-
     }
 
     // 删除一个导航
-    const removeOneTag = (tag) => {
+    const removeOneTag = (path) => {
 
       //不允许删除首页
-      if (tag.path === '/') return;
+      if (path === '/') return;
 
       //删除
-      tagsList.value.splice(tagsList.value.findIndex(t => t === tag), 1)
-
+      let tag = tagsList.value.find(t => t.path === path)
+      if (!tag) return;
       //如果是激活就跳转到上一个路由
       if (tag.active) {
         prePage.value.active = true
 
         if (prePage.value.path) {
-          setOneActiveTag(prePage.value)
+          // router.push(prePage.value.path)
+          router.push('/')
         } else {
-          setOneActiveTag(firstPage)
+          router.push('/')
         }
         prePage.value = {}
       }
+
+      tagsList.value.splice(tagsList.value.findIndex(t => t.path === path), 1)
     }
 
     // 关闭其他页面
@@ -88,7 +90,7 @@ export const useUserStore = defineStore(
       } else {
         firstPage.active = false
         tagsList.value = [firstPage, curPage.value]
-        setOneActiveTag(curPage.value)
+        router.push(curPage.value.path)
       }
 
     }
@@ -96,7 +98,7 @@ export const useUserStore = defineStore(
     // 关闭所有页面
     const closeAllPage = () => {
       tagsList.value = [firstPage]
-      setOneActiveTag(firstPage)
+      router.push('/')
     }
 
 

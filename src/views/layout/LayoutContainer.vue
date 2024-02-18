@@ -77,10 +77,12 @@ const handleCommand = async (key, name) => {
 
   } else {
     // 跳转操作
-    userStore.setOneActiveTag({
-      path: `/test/${key}`,
-      title: name
-    })
+    router.push(`/test/${key}`)
+
+    // userStore.setOneActiveTag({
+    //   path: `/test/${key}`,
+    //   title: name
+    // })
   }
 }
 
@@ -126,6 +128,13 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
   }
 
   return breadcrumbList;
+}
+
+const tagPush = (tag) => {
+  router.push(tag.path) 
+}
+const tagRemove = (tag) => {
+  userStore.removeOneTag(tag.path)
 }
 </script>
 
@@ -185,7 +194,7 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
             <!-- 个人设置 -->
             <el-dropdown placement="bottom-end">
               <span class="el-dropdown__box">
-                <el-avatar :src="userStore.userInfo.logo||avatar" />
+                <el-avatar :src="userStore.userInfo.logo || avatar" />
                 <el-icon>
                   <CaretBottom />
                 </el-icon>
@@ -208,10 +217,10 @@ const getBreadcrumb = (curRoute, isDeep, breadcrumbList) => {
           <!-- 窗口列表 -->
           <el-scrollbar style="padding-bottom: 5px;">
             <div class="tags-left">
-              <span :class="{ 'active': tag.active, 'tags-item': true }" v-for="(tag, index) in userStore.tagsList"
-                :key="tag.path" @click="userStore.setOneActiveTag(tag, index)" class="tags-view-item">
+              <span :class="{ 'active': tag.active, 'tags-item': true }" v-for="(tag) in userStore.tagsList"
+                :key="tag.path" @click="tagPush(tag)" class="tags-view-item">
                 {{ tag.title }}
-                <el-icon class="el-icon-close" @click.prevent.stop="userStore.removeOneTag(tag)">
+                <el-icon class="el-icon-close" @click.prevent.stop="tagRemove(tag)">
                   <Close />
                 </el-icon>
               </span>
